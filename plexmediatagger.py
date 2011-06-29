@@ -23,78 +23,24 @@ import os
 import re
 import glob
 import unicodedata
-import logging
 import signal
+import logging
 
 from lxml import etree
 from optparse import OptionParser
+from ColorizingStreamHandler import *
 from PmsRequestHandler import *
-    
-def processSection(opts, requestHandler, section):
-    BASEINDENTATION = "  "
-    sectionType = section.attrib['type']
-    if sectionType == "movie":
-        processMovieSection(opts, requestHandler, section)
-    elif sectionType == "show":
-        processShowSection(opts, requestHandler, section)
-    else:
-        print BASEINDENTATION+"'%s' content type is not supported" % sectionType
-    #end if sectionType
-#end processSection
-
-
-def processMovieSection(opts, requestHandler, section):
-    BASEINDENTATION = "    "
-    sectionKey = section.attrib['key']
-    contentsContainer = requestHandler.getSectionAllContainerForKey(sectionKey)
-    
-    mediaContainer = contentsContainer.getroot()
-    title = mediaContainer.attrib['title1']
-    videos = mediaContainer.getchildren()
-    
-    videoChoice = len(videos) #default is count of videos, ie ALL
-    if opts.interactive:
-        print BASEINDENTATION+"List of movies in %s" % title
-        for index, video in enumerate(videos):
-            print BASEINDENTATION+"%d. %s (%s)" % (index, video.attrib['title'], video.attrib['year'])
-        #end for
-        if len(videos) > 0:
-            print BASEINDENTATION+"%d. %s" % (len(videos), "ALL")
-        #end if
-        
-        #ask user what sections should be processed
-        input = raw_input(BASEINDENTATION+"$ Video to tag: ")
-        try:
-            videoChoice = int(input)
-        except ValueError, e:
-            logging.debug(e)
-            logging.critical("'%s' is not a valid video number" % input)
-            sys.exit(1)
-        #end try
-    #end if
-    
-    if videoChoice == len(videos): #all
-        videosToProcess = videos
-    else:
-        videosToProcess = [videos[videoChoice]]
-    #end if
-    
-    for videoToProcess in videosToProcess:
-        print BASEINDENTATION+"  processing %s (%s)" % (videoToProcess.attrib['title'], videoToProcess.attrib['year'])
-        #TODO: here the file will actually be tagged
-        
-#end processMovieSection
-
-def processShowSection(opts, requestHandler, section):
-    #TODO: implement
-    return    
-#end processShowSection
+from SectionProcessor import *
 
 
 def main():
     BASEINDENTATION = "  "
     signal.signal(signal.SIGINT, signal_handler)
-    logging.basicConfig()
+    
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.addHandler(ColorizingStreamHandler())
+    
     parser = OptionParser(usage="%prog [options] <full path directory>\n%prog -h for full list of options")
     
     parser.add_option(  "-b", "--batch", action="store_false", dest="interactive",
@@ -131,50 +77,55 @@ def main():
     #end if args
     
     
-    logging.info("============ Plex Media Tagger Started ============")
+    logging.error( "============ Plex Media Tagger Started ============" )
     
     requestHandler = PmsRequestHandler(ip, "32400")
-    sectionsContainer = requestHandler.getSectionsContainer()
+    sectionProcessor = SectionProcessor(opts, requestHandler)
     
+    sectionsContainer = requestHandler.getSectionsContainer()
     mediaContainer = sectionsContainer.getroot()
     title = mediaContainer.attrib['title1']
     sections = mediaContainer.getchildren()
     
     sectionChoice = len(sections) #default is count of sections, ie ALL
     if opts.interactive:
-        print "List of sections for %s" % title
+        logging.info( "List of sections for %s" % title )
         for index, section in enumerate(sections):
-            print "%d. %s" %(index, section.attrib['title'])
+            logging.info( "%d. %s" %(index, section.attrib['title']) )
         #end for
-        if len(sections) > 0:
-            print "%d. %s" %(len(sections), "ALL")
-        #end if
-        
-        #ask user what sections should be processed
-        input = raw_input("$ Section to process: ")
-        try:
-            sectionChoice = int(input)
-        except ValueError, e:
-            logging.debug(e)
-            logging.critical("'%s' is not a valid section number" % input)
-            sys.exit(1)
-        #end try
-    #end if
+        if len(sections) == 0:
+            logging.error( "No sections found" )
+        else:    
+            logging.warning( "empty equals all" )
     
-    if sectionChoice == len(sections): #all
+            #ask user what sections should be processed
+            sectionChoice = raw_input("Section to process $")
+            if sectionChoice != '':
+                try:
+                    sectionChoice = int(input)
+                except ValueError, e:
+                    logging.debug(e)
+                    logging.critical( "'%s' is not a valid section number" % input )
+                    sys.exit(1)
+                #end try
+            #end if sectionChoice
+        #end if len(sections)
+    #end if opts.interactive
+    
+    if sectionChoice == '': #all
         sectionsToProcess = sections
     else:
         sectionsToProcess = [sections[sectionChoice]]
     #end if
     
-    print "\nProcessing sections..."
+    logging.warning( "Processing sections..." )
     for index, sectionToProcess in enumerate(sectionsToProcess):
         sectionTitle = sectionToProcess.attrib['title']
-        print "  Processing section %d/%d : '%s'" % (index+1, len(sectionsToProcess), sectionTitle)
-        processSection(opts, requestHandler, sectionToProcess)
+        logging.warning( "  Loading section %d/%d : '%s'..." % (index+1, len(sectionsToProcess), sectionTitle) )
+        sectionProcessor.processSection(sectionToProcess)
     #end for
-    
-    logging.info("============ Plex Media Tagger Completed ============")
+    logging.warning( "Processing sections completed" )
+    logging.error( "============ Plex Media Tagger Completed ============" )
 #end main
 
 
@@ -183,7 +134,7 @@ def setLogLevel(*args, **kwargs):
 
 
 def signal_handler(signal, frame):
-    print '\nTerminating Plex Media Tagger'
+    logging.critical( "\r============ Terminating Plex Media Tagger ============" )
     sys.exit(0)
 #end signal_handler
 
