@@ -38,4 +38,9 @@ class PmsRequestHandler:
         return self.getContents(url)
     #end getSection
     
+    def getMetadataContainerForKey(self, partialUrl):
+        url = "%s%s" % (self.baseUrl, partialUrl)
+        return self.getContents(url)
+    #end getSection
+    
 #end class PmsRequestHandler 

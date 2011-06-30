@@ -4,8 +4,12 @@
 #
 # Copyright (C) 2010, 2011 Vinay Sajip. All rights reserved.
 #
+#
+# Modified by Chris Jensen 
+# to add support for indentation of message based upon stack trace depth
 
 import logging
+import traceback
 import os
 
 class ColorizingStreamHandler(logging.StreamHandler):
@@ -123,5 +127,8 @@ class ColorizingStreamHandler(logging.StreamHandler):
             # Don't colorize any traceback
             parts = message.split('\n', 1)
             parts[0] = self.colorize(parts[0], record)
-            message = '\n'.join(parts)
-        return message
+            message = '\n'.join(parts)        
+        
+        indentation_level = len(traceback.extract_stack()) - 10;
+        return (' '*indentation_level)+message
+#        return message

@@ -8,6 +8,8 @@
 
 from lxml import etree
 import logging
+import sys
+from MetadataParsers import *
 
 class SectionProcessor:
     """docstring for PmsRequestHandler"""
@@ -17,20 +19,18 @@ class SectionProcessor:
     #end def __init__
     
     def processSection(self, section):
-        BASEINDENTATION = "  "
         sectionType = section.attrib['type']
         if sectionType == "movie":
             self.processMovieSection(section)
         elif sectionType == "show":
             self.processShowSection(section)
         else:
-            logging.error( BASEINDENTATION+"'%s' content type is not supported" % sectionType )
+            logging.error( "'%s' content type is not supported" % sectionType )
         #end if sectionType
     #end processSection
 
 
     def processMovieSection(self, section):
-        BASEINDENTATION = "    "
         sectionKey = section.attrib['key']
         contentsContainer = self.requestHandler.getSectionAllContainerForKey(sectionKey)
     
@@ -42,37 +42,37 @@ class SectionProcessor:
         listOfVideos = videos #all
         
         if self.opts.interactive:
-            logging.info( BASEINDENTATION+"Type part of the movie name or leave empty for full list %s" % title )
-            input = raw_input(BASEINDENTATION+"Movie name $")
+            logging.info( "Type part of the movie name or leave empty for full list %s" % title )
+            input = raw_input("Movie name $")
             
             if input == '':
-                logging.info( BASEINDENTATION+"List of items in %s" % title )
+                logging.info( "List of items in %s" % title )
                 listOfVideos = videos
             else:
                 input = input.lower()
-                logging.info( BASEINDENTATION+"List of items in %s matching '%s'" % (title, input) )
+                logging.info( "List of items in %s matching '%s'" % (title, input) )
                 listOfVideos = [video for video in videos if input in video.attrib['title'].lower()]
             #end if input == 'ALL'
             
             for index, video in enumerate(listOfVideos):
-                logging.info( BASEINDENTATION+"%d. %s (%s)" % (index, video.attrib['title'], video.attrib['year']) )
+                logging.info( "%d. %s (%s)" % (index, video.attrib['title'], video.attrib['year']) )
             #end for
             if len(listOfVideos) == 0:
-                logging.error( BASEINDENTATION+"No found items" )
+                logging.error( "No items found" )
             else:    
-                logging.warning( BASEINDENTATION+"empty equals all" )
+                logging.warning( "empty input equals all" )
                 
                 #ask user what videos should be processed
-                videoChoice = raw_input(BASEINDENTATION+"Video ID to tag $")
+                videoChoice = raw_input("Video ID to tag $")
                 if videoChoice != '':
                     try:
-                        videoChoice = int(input)
+                        videoChoice = int(videoChoice)
                     except ValueError, e:
                         logging.debug(e)
                         logging.critical("'%s' is not a valid video ID" % input)
                         sys.exit(1)
                     #end try
-                #end if input
+                #end if videoChoice
             #end if len(listOfVideos)
         #end if
     
@@ -83,12 +83,26 @@ class SectionProcessor:
         #end if
         
         for index, videoToProcess in enumerate(videosToProcess):
-            logging.info( BASEINDENTATION+"  processing %d/%d : %s (%s)..." % (index+1, len(videosToProcess), videoToProcess.attrib['title'], videoToProcess.attrib['year']) )
-            #TODO: here the file will actually be tagged
+            url = videoToProcess.attrib['key']
+            videoMetadataContainer = self.requestHandler.getMetadataContainerForKey(url)
+            movie = MovieMetadataParser(self.opts, videoMetadataContainer)
+            logging.info( "processing %d/%d : %s (%s)..." % (index+1, len(videosToProcess), movie.title, movie.year) )
+            self.tagFile(movie)
+        #end for videosToProcess
+            
         
     #end processMovieSection
 
     def processShowSection(self, section):
         #TODO: implement
+        return    
+    #end processShowSection
+    
+    def tagFile(self, mediaItem):
+        BASEINDENTATION = "        "
+        #TODO: implement
+        if '.m4v' in mediaItem.fileTypes or '.mp4' in mediaItem.fileTypes:
+            logging.error("tagging %s" % mediaItem.title)
+        #print mediaItem.tagString()
         return    
     #end processShowSection

@@ -34,7 +34,6 @@ from SectionProcessor import *
 
 
 def main():
-    BASEINDENTATION = "  "
     signal.signal(signal.SIGINT, signal_handler)
     
     root = logging.getLogger()
@@ -47,6 +46,8 @@ def main():
                         help="selects first search result, requires no human intervention once launched")
     parser.add_option(  "-i", "--interactive", action="store_true", dest="interactive",
                         help="interactivly select correct show from search results [default]")
+    parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
+                        help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the begining of the file. [default]")
     parser.add_option(  "-d", "--debug", action="store_true", dest="debug", 
                         help="shows all debugging info")
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
@@ -55,16 +56,10 @@ def main():
                         help="For ninja-like processing")
     parser.add_option(  "-f", "--force-tagging", action="store_true", dest="forcetagging",
                         help="Tags all valid files, even previously tagged ones")
-    parser.set_defaults( interactive=True, debug=False, verbose=True, forcetagging=False,
+    parser.set_defaults( interactive=True, optimize=True, debug=False, verbose=True, forcetagging=False,
                             removetags=False, rename=True, tagging=True )
     
     opts, args = parser.parse_args()
-    
-    # logging.debug('This is a debug message')
-    # logging.info('This is an info message')
-    # logging.warning('This is a warning message')
-    # logging.error('This is an error message')
-    # logging.critical('This is a critical error message')
     
     ip = ""
     port = "32400"
@@ -79,7 +74,7 @@ def main():
     
     logging.error( "============ Plex Media Tagger Started ============" )
     
-    requestHandler = PmsRequestHandler(ip, "32400")
+    requestHandler = PmsRequestHandler(ip, port)
     sectionProcessor = SectionProcessor(opts, requestHandler)
     
     sectionsContainer = requestHandler.getSectionsContainer()
@@ -96,13 +91,13 @@ def main():
         if len(sections) == 0:
             logging.error( "No sections found" )
         else:    
-            logging.warning( "empty equals all" )
+            logging.warning( "empty input equals all" )
     
             #ask user what sections should be processed
             sectionChoice = raw_input("Section to process $")
             if sectionChoice != '':
                 try:
-                    sectionChoice = int(input)
+                    sectionChoice = int(sectionChoice)
                 except ValueError, e:
                     logging.debug(e)
                     logging.critical( "'%s' is not a valid section number" % input )
@@ -121,8 +116,9 @@ def main():
     logging.warning( "Processing sections..." )
     for index, sectionToProcess in enumerate(sectionsToProcess):
         sectionTitle = sectionToProcess.attrib['title']
-        logging.warning( "  Loading section %d/%d : '%s'..." % (index+1, len(sectionsToProcess), sectionTitle) )
+        logging.warning( "Loading section %d/%d : '%s'..." % (index+1, len(sectionsToProcess), sectionTitle) )
         sectionProcessor.processSection(sectionToProcess)
+        logging.warning( "Section '%s' processed" % sectionTitle )
     #end for
     logging.warning( "Processing sections completed" )
     logging.error( "============ Plex Media Tagger Completed ============" )
