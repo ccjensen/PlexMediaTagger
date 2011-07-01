@@ -9,6 +9,7 @@
 from lxml import etree
 import logging
 import sys
+import subprocess
 from MetadataParsers import *
 
 class SectionProcessor:
@@ -63,7 +64,7 @@ class SectionProcessor:
                 logging.warning( "empty input equals all" )
                 
                 #ask user what videos should be processed
-                videoChoice = raw_input("Video ID to tag $")
+                videoChoice = raw_input("Video # to tag $")
                 if videoChoice != '':
                     try:
                         videoChoice = int(videoChoice)
@@ -99,10 +100,29 @@ class SectionProcessor:
     #end processShowSection
     
     def tagFile(self, mediaItem):
-        BASEINDENTATION = "        "
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         #TODO: implement
         if '.m4v' in mediaItem.fileTypes or '.mp4' in mediaItem.fileTypes:
-            logging.error("tagging %s" % mediaItem.title)
-        #print mediaItem.tagString()
+            logging.error("tagging %s" % mediaItem.name())
+            
+            #Create the command line string
+            tagCmd = ['%s' % SublerCLI]
+            tagCmd.append("-t")
+            tagCmd.append(mediaItem.tagString())
+            
+            for paths in mediaItem.mediaPaths():
+                newTagCmd = tagCmd
+                newTagCmd.append("-i")
+                newTagCmd.append(paths)
+                
+                logging.debug("Tag command: %s" % newTagCmd)
+                #run SublerCLI using the arguments we have created
+                result = subprocess.Popen(newTagCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+                if "Error" in result:
+                    logging.critical(result.strip())
+                else:
+                    logging.error("Tagged: %s" % mediaItem.name())
+                #end if "Error"
+            #end for paths
         return    
     #end processShowSection

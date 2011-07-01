@@ -8,6 +8,7 @@
 
 from lxml import etree
 import logging
+import sys
 
 class PmsRequestHandler:
     """docstring for PmsRequestHandler"""
@@ -23,7 +24,8 @@ class PmsRequestHandler:
             contents = etree.parse(url)
         except IOError, e:
             logging.debug(e)
-            logging.critical("Could not connect to server [%s] at port [%s]" % (self.ip, self.port))
+            logging.critical("Could not connect to server %s:%s" % (self.ip, self.port))
+            sys.exit(1)
         #end try
         return contents
     #end getSectionsList

@@ -32,15 +32,10 @@ class MetadataParser(object):
         return result
     #end def arrayOfTagAttributesFromNodesWithName
     
-#     <Media id="49" duration="9701000" bitrate="4678" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mov" videoFrameRate="24p">
-# <Part id="49" key="/library/parts/49/Avatar%20(2009).m4v" duration="9701000" file="/Volumes/Drobo/Movies/Avatar (2009)/Avatar (2009).m4v" size="5810197410">
-# <Stream id="37843" streamType="1" codec="h264" index="0" language="?" languageCode="und" />
-# <Stream id="37844" streamType="2" selected="1" codec="aac" index="1" channels="2" language="English" languageCode="eng" />
-# <Stream id="37845" streamType="3" index="2" language="English" languageCode="eng" />
-# <Stream id="37846" streamType="3" index="3" language="?" languageCode="und" />
-# </Part>
-# </Media>
-
+    def name(self):
+        return "Generic Name"
+    #end def name
+    
     def mediaPaths(self):
         mediaNode = self.video.find("Media")
         return self.arrayOfAttributesWithKeyFromChildNodesWithName(mediaNode, "Part", "file")
@@ -58,7 +53,7 @@ class MetadataParser(object):
     
     def newTagStringEntry(self, key, value):
         #example: "{'Long Description':'blah blah it\'s time to come home blah'}"
-        return "{'%s':'%s'} " % (key, value.strip())
+        return '{%s:%s}' % (key, value.strip())
     #end def newTagStringEntry
 #end class MetadataParser
     
@@ -96,6 +91,10 @@ class MovieMetadataParser(MetadataParser):
         self.cast = ', '.join(self.castNames)
     #end def __init__
     
+    def name(self):
+        return "%s (%s)" % (self.title, self.year)
+    #end def name
+    
     def tagString(self):        
         tagString = ""
         tagString += self.newTagStringEntry("Studio", self.studio)
@@ -112,17 +111,15 @@ class MovieMetadataParser(MetadataParser):
         tagString += self.newTagStringEntry("Rating", self.contentRating)
         tagString += self.newTagStringEntry("Long Description", self.summary)
         tagString += self.newTagStringEntry("Release Date", self.originallyAvailableAt)
-        tagString += self.newTagStringEntry("Description", len(self.tagline) > 0 if self.tagline else self.summary)
-
+        tagString += self.newTagStringEntry("Description", self.tagline if len(self.tagline) > 0 else self.summary)
+        
         tagString += self.newTagStringEntry("Genre", self.genre) #single genre
         tagString += self.newTagStringEntry("Screenwriters", self.writers)
         tagString += self.newTagStringEntry("Director", self.directors)
         tagString += self.newTagStringEntry("Cast", self.cast)
         
-        hdValue = "%d" % 1 if self.isHD else 0
+        hdValue = "%d" % (1 if self.isHD() else 0)
         tagString += self.newTagStringEntry("HD Video", hdValue)
-        
-        print self.fileTypes
         
         return tagString.strip()
     #end def tagString

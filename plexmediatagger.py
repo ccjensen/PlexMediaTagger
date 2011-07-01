@@ -37,46 +37,48 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     
     root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
+    root.setLevel(logging.WARNING)
     root.addHandler(ColorizingStreamHandler())
     
-    parser = OptionParser(usage="%prog [options] <full path directory>\n%prog -h for full list of options")
+    parser = OptionParser(usage="%prog [options] [alternate IP/Domain (default is localhost)] [port number (default is 32400)]\n%prog -h for full list of options")
     
     parser.add_option(  "-b", "--batch", action="store_false", dest="interactive",
-                        help="selects first search result, requires no human intervention once launched")
+                        help="Disables interactive. Requires no human intervention once launched, and will perform operations on all files")
     parser.add_option(  "-i", "--interactive", action="store_true", dest="interactive",
-                        help="interactivly select correct show from search results [default]")
+                        help="interactivly select files to operate on [default]")
     parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
                         help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the begining of the file. [default]")
-    parser.add_option(  "-d", "--debug", action="store_true", dest="debug", 
-                        help="shows all debugging info")
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
                         callback=setLogLevel, help='Increase verbosity')
-    parser.add_option(  "-q", "--quiet", action="store_false", dest="verbose",
-                        help="For ninja-like processing")
+    parser.add_option(  "-q", "--quiet", action="store_false", dest="quiet",
+                        help="For ninja-like processing (Can only be used when in batch mode)")
     parser.add_option(  "-f", "--force-tagging", action="store_true", dest="forcetagging",
-                        help="Tags all valid files, even previously tagged ones")
-    parser.set_defaults( interactive=True, optimize=True, debug=False, verbose=True, forcetagging=False,
-                            removetags=False, rename=True, tagging=True )
+                        help="Tags all chosen files, even previously tagged ones")
+    parser.set_defaults( interactive=True, optimize=True, forcetagging=False,
+                            removetags=False, quiet=False )
     
     opts, args = parser.parse_args()
     
-    ip = ""
+    ip = "localhost"
     port = "32400"
-    if len(args) == 0:
-        parser.error("No pms ip supplied")
-    elif len(args) > 1:
-        parser.error("Provide single ip")
-    else:
+    if len(args) == 1:
         ip = args[0]
+    if len(args) == 2:
+        ip = args[0]
+        port = args[1]
+    elif len(args) > 2:
+        parser.error("Provide single IP/domain")
     #end if args
     
+    if opts.interactive and not root.isEnabledFor(logging.INFO):
+        root.setLevel(logging.INFO)
     
     logging.error( "============ Plex Media Tagger Started ============" )
     
     requestHandler = PmsRequestHandler(ip, port)
     sectionProcessor = SectionProcessor(opts, requestHandler)
     
+    logging.error( "Connecting to PMS at %s:%s" % (ip, port) )
     sectionsContainer = requestHandler.getSectionsContainer()
     mediaContainer = sectionsContainer.getroot()
     title = mediaContainer.attrib['title1']
