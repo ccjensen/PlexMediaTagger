@@ -40,7 +40,12 @@ def main():
     root.setLevel(logging.WARNING)
     root.addHandler(ColorizingStreamHandler())
     
-    parser = OptionParser(usage="%prog [options] [alternate IP/Domain (default is localhost)] [port number (default is 32400)]\n%prog -h for full list of options")
+    parser = OptionParser(usage="\
+%prog [options] [alternate IP/Domain (default is localhost)] [port number (default is 32400)]\n\
+Example: %prog -of 192.168.0.2 55400\n\
+%prog -h for full list of options\n\n\
+Filepaths to media items in PMS need to be the same as on machine that is running this script.\
+")
     
     parser.add_option(  "-b", "--batch", action="store_false", dest="interactive",
                         help="Disables interactive. Requires no human intervention once launched, and will perform operations on all files")
@@ -67,7 +72,7 @@ def main():
         ip = args[0]
         port = args[1]
     elif len(args) > 2:
-        parser.error("Provide single IP/domain")
+        parser.error("Provide only one IP/Domain and port number")
     #end if args
     
     if opts.interactive and not root.isEnabledFor(logging.INFO):
@@ -75,16 +80,19 @@ def main():
     
     logging.error( "============ Plex Media Tagger Started ============" )
     
-    requestHandler = PmsRequestHandler(ip, port)
-    sectionProcessor = SectionProcessor(opts, requestHandler)
+    request_handler = PmsRequestHandler()
+    request_handler.ip = ip
+    request_handler.port = port
+    
+    section_processor = SectionProcessor(opts, request_handler)
     
     logging.error( "Connecting to PMS at %s:%s" % (ip, port) )
-    sectionsContainer = requestHandler.getSectionsContainer()
-    mediaContainer = sectionsContainer.getroot()
-    title = mediaContainer.attrib['title1']
-    sections = mediaContainer.getchildren()
+    sections_container = request_handler.getSectionsContainer()
+    media_container = sections_container.getroot()
+    title = media_container.attrib['title1']
+    sections = media_container.getchildren()
     
-    sectionChoice = len(sections) #default is count of sections, ie ALL
+    section_choice = len(sections) #default is count of sections, ie ALL
     if opts.interactive:
         logging.info( "List of sections for %s" % title )
         for index, section in enumerate(sections):
@@ -96,31 +104,31 @@ def main():
             logging.warning( "empty input equals all" )
     
             #ask user what sections should be processed
-            sectionChoice = raw_input("Section to process $")
-            if sectionChoice != '':
+            section_choice = raw_input("Section to process $")
+            if section_choice != '':
                 try:
-                    sectionChoice = int(sectionChoice)
+                    section_choice = int(section_choice)
                 except ValueError, e:
                     logging.debug(e)
                     logging.critical( "'%s' is not a valid section number" % input )
                     sys.exit(1)
                 #end try
-            #end if sectionChoice
+            #end if section_choice
         #end if len(sections)
     #end if opts.interactive
     
-    if sectionChoice == '': #all
-        sectionsToProcess = sections
+    if section_choice == '': #all
+        sections_to_process = sections
     else:
-        sectionsToProcess = [sections[sectionChoice]]
+        sections_to_process = [sections[section_choice]]
     #end if
     
     logging.warning( "Processing sections..." )
-    for index, sectionToProcess in enumerate(sectionsToProcess):
-        sectionTitle = sectionToProcess.attrib['title']
-        logging.warning( "Loading section %d/%d : '%s'..." % (index+1, len(sectionsToProcess), sectionTitle) )
-        sectionProcessor.processSection(sectionToProcess)
-        logging.warning( "Section '%s' processed" % sectionTitle )
+    for index, section_to_process in enumerate(sections_to_process):
+        section_title = section_to_process.attrib['title']
+        logging.warning( "Loading section %d/%d : '%s'..." % (index+1, len(sections_to_process), section_title) )
+        section_processor.process_section(section_to_process)
+        logging.warning( "Section '%s' processed" % section_title )
     #end for
     logging.warning( "Processing sections completed" )
     logging.error( "============ Plex Media Tagger Completed ============" )

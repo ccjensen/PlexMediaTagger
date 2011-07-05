@@ -1,5 +1,5 @@
 Tag Name					Type
--Name						string
+Name						string
 Artist					string
 Album Artist			string
 Album						string

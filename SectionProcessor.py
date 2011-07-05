@@ -14,33 +14,33 @@ from MetadataParsers import *
 
 class SectionProcessor:
     """docstring for PmsRequestHandler"""
-    def __init__(self, opts, requestHandler):
+    def __init__(self, opts, request_handler):
         self.opts = opts
-        self.requestHandler = requestHandler
+        self.request_handler = request_handler
     #end def __init__
     
-    def processSection(self, section):
-        sectionType = section.attrib['type']
-        if sectionType == "movie":
-            self.processMovieSection(section)
-        elif sectionType == "show":
+    def process_section(self, section):
+        section_type = section.attrib['type']
+        if section_type == "movie":
+            self.process_movie_section(section)
+        elif section_type == "show":
             self.processShowSection(section)
         else:
             logging.error( "'%s' content type is not supported" % sectionType )
         #end if sectionType
-    #end processSection
+    #end process_section
 
 
-    def processMovieSection(self, section):
-        sectionKey = section.attrib['key']
-        contentsContainer = self.requestHandler.getSectionAllContainerForKey(sectionKey)
+    def process_movie_section(self, section):
+        section_key = section.attrib['key']
+        contents_container = self.request_handler.get_section_all_container_for_key(section_key)
     
-        mediaContainer = contentsContainer.getroot()
-        title = mediaContainer.attrib['title1']
-        videos = mediaContainer.getchildren()
+        media_container = contents_container.getroot()
+        title = media_container.attrib['title1']
+        videos = media_container.getchildren()
         
-        videoChoice = ''
-        listOfVideos = videos #all
+        video_choice = ''
+        list_of_videos = videos #all
         
         if self.opts.interactive:
             logging.info( "Type part of the movie name or leave empty for full list %s" % title )
@@ -48,80 +48,82 @@ class SectionProcessor:
             
             if input == '':
                 logging.info( "List of items in %s" % title )
-                listOfVideos = videos
+                list_of_videos = videos
             else:
                 input = input.lower()
                 logging.info( "List of items in %s matching '%s'" % (title, input) )
-                listOfVideos = [video for video in videos if input in video.attrib['title'].lower()]
+                list_of_videos = [video for video in videos if input in video.attrib['title'].lower()]
             #end if input == 'ALL'
             
-            for index, video in enumerate(listOfVideos):
+            for index, video in enumerate(list_of_videos):
                 logging.info( "%d. %s (%s)" % (index, video.attrib['title'], video.attrib['year']) )
             #end for
-            if len(listOfVideos) == 0:
+            if len(list_of_videos) == 0:
                 logging.error( "No items found" )
             else:    
                 logging.warning( "empty input equals all" )
                 
                 #ask user what videos should be processed
-                videoChoice = raw_input("Video # to tag $")
-                if videoChoice != '':
+                video_choice = raw_input("Video # to tag $")
+                if video_choice != '':
                     try:
-                        videoChoice = int(videoChoice)
+                        video_choice = int(video_choice)
                     except ValueError, e:
                         logging.debug(e)
                         logging.critical("'%s' is not a valid video ID" % input)
                         sys.exit(1)
                     #end try
-                #end if videoChoice
-            #end if len(listOfVideos)
+                #end if video_choice
+            #end if len(list_of_videos)
         #end if
     
-        if videoChoice == '': #all
-            videosToProcess = listOfVideos
+        if video_choice == '': #all
+            videos_to_process = list_of_videos
         else:
-            videosToProcess = [listOfVideos[videoChoice]]
+            videos_to_process = [list_of_videos[video_choice]]
         #end if
         
-        for index, videoToProcess in enumerate(videosToProcess):
-            url = videoToProcess.attrib['key']
-            videoMetadataContainer = self.requestHandler.getMetadataContainerForKey(url)
-            movie = MovieMetadataParser(self.opts, videoMetadataContainer)
-            logging.info( "processing %d/%d : %s (%s)..." % (index+1, len(videosToProcess), movie.title, movie.year) )
-            self.tagFile(movie)
-        #end for videosToProcess
+        for index, video_to_process in enumerate(videos_to_process):
+            url = video_to_process.attrib['key']
+            video_metadata_container = self.request_handler.get_metadata_container_for_key(url)
+            movie = MovieMetadataParser(self.opts, video_metadata_container)
+            logging.info( "processing %d/%d : %s (%s)..." % (index+1, len(videos_to_process), movie.title, movie.year) )
+            self.tag_file(movie)
+        #end for videos_to_process
             
         
-    #end processMovieSection
+    #end process_movie_section
 
-    def processShowSection(self, section):
+    def process_show_section(self, section):
         #TODO: implement
         return    
     #end processShowSection
     
-    def tagFile(self, mediaItem):
+    def tag_file(self, media_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         #TODO: implement
-        if '.m4v' in mediaItem.fileTypes or '.mp4' in mediaItem.fileTypes:
-            logging.error("tagging %s" % mediaItem.name())
+        if '.m4v' in media_item.file_types or '.mp4' in media_item.file_types:            
+            #get any artwork
+            
+            logging.error("tagging %s" % media_item.name())
             
             #Create the command line string
-            tagCmd = ['%s' % SublerCLI]
-            tagCmd.append("-t")
-            tagCmd.append(mediaItem.tagString())
+            tag_cmd = ['%s' % SublerCLI]
+            tag_cmd.append("-t")
+            tag_cmd.append(media_item.tag_string())
             
-            for paths in mediaItem.mediaPaths():
-                newTagCmd = tagCmd
-                newTagCmd.append("-i")
-                newTagCmd.append(paths)
+            for paths in media_item.media_paths():
+                new_tag_cmd = tag_cmd
+                new_tag_cmd.append("-i")
+                new_tag_cmd.append(paths)
                 
-                logging.debug("Tag command: %s" % newTagCmd)
+                logging.debug("tag command arguements: %s" % new_tag_cmd)
                 #run SublerCLI using the arguments we have created
-                result = subprocess.Popen(newTagCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+                result = subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
                 if "Error" in result:
                     logging.critical(result.strip())
                 else:
-                    logging.error("Tagged: %s" % mediaItem.name())
+                    logging.error("Tagged: %s" % media_item.name())
                 #end if "Error"
             #end for paths
         return    
