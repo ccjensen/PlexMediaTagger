@@ -22,14 +22,11 @@ The tool requires python (pre-installed on Snow Leopard) and a python module cal
 Note: Filepaths to media items in PMS need to be the same as on machine that is running this script.
 
 ### Options:
-  -h, --help           show this help message and exit
-  -b, --batch          Disables interactive. Requires no human intervention
-                       once launched, and will perform operations on all files
-  -i, --interactive    interactively select files to operate on [default]
-  -o, --optimize       Interleaves the audio and video samples, and puts the
-                       "MooV" atom at the begining of the file. [default]
-  -v, --verbose        Increase verbosity
-  -q, --quiet          For ninja-like processing (Can only be used when in
-                       batch mode)
-  -f, --force-tagging  Tags all chosen files, even previously tagged ones
+  -h, --help           show this help message and exit  
+  -b, --batch          Disables interactive. Requires no human intervention once launched, and will perform operations on all files  
+  -i, --interactive    interactively select files to operate on [default]  
+  -o, --optimize       Interleaves the audio and video samples, and puts the "MooV" atom at the beginning of the file.  
+  -v, --verbose        Increase verbosity  
+  -q, --quiet          For ninja-like processing (Can only be used when in batch mode)  
+  -f, --force-tagging  Tags all chosen files, even previously tagged ones  
 
