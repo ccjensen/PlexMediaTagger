@@ -55,7 +55,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the beginning of the file.")
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
                         callback=setLogLevel, help='Increase verbosity')
-    parser.add_option(  "-q", "--quiet", action="store_false", dest="quiet",
+    parser.add_option(  "-q", "--quiet", action="store_true", dest="quiet",
                         help="For ninja-like processing (Can only be used when in batch mode)")
     parser.add_option(  "-f", "--force-tagging", action="store_true", dest="forcetagging",
                         help="Tags all chosen files, even previously tagged ones")
@@ -74,6 +74,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     elif len(args) > 2:
         parser.error("Provide only one IP/Domain and port number")
     #end if args
+    
+    if opts.quiet:
+        root.setLevel(logging.ERROR)
     
     if opts.interactive and not root.isEnabledFor(logging.INFO):
         root.setLevel(logging.INFO)
@@ -123,14 +126,14 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         sections_to_process = [sections[section_choice]]
     #end if
     
-    logging.warning( "Processing sections..." )
+    logging.error( "Processing sections..." )
     for index, section_to_process in enumerate(sections_to_process):
         section_title = section_to_process.attrib['title']
-        logging.warning( "Loading section %d/%d : '%s'..." % (index+1, len(sections_to_process), section_title) )
+        logging.error( "Processing section %d/%d : '%s'..." % (index+1, len(sections_to_process), section_title) )
         section_processor.process_section(section_to_process)
         logging.warning( "Section '%s' processed" % section_title )
     #end for
-    logging.warning( "Processing sections completed" )
+    logging.error( "Processing sections completed" )
     logging.error( "============ Plex Media Tagger Completed ============" )
 #end main
 

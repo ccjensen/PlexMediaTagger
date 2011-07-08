@@ -105,7 +105,7 @@ class SectionProcessor:
         for index, partial_movie_metadata in enumerate(selected_movies):
             movie_metadata_container = self.request_handler.get_metadata_container_for_key(partial_movie_metadata.key)
             movie = MovieMetadataParser(self.opts, movie_metadata_container)
-            logging.error( "processing %d/%d %ss : %s..." % (index+1, len(selected_movies), contents_type, movie.name()) )
+            logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_movies), contents_type, movie.name()) )
             self.tag_file(movie)
         #end for videos_to_process
     #end process_movie_section
@@ -119,7 +119,7 @@ class SectionProcessor:
         
         contents_type = shows_media_container.get('viewGroup', "")
         for index, show in enumerate(selected_shows):
-            logging.error( "processing %d/%d %ss : %s..." % (index+1, len(selected_shows), contents_type, show.name()) )
+            logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_shows), contents_type, show.name()) )
             self.process_season_section(show)
         #end for show_to_process
     #end process_show_section
@@ -133,7 +133,7 @@ class SectionProcessor:
         
         contents_type = seasons_media_container.get('viewGroup', "")
         for index, season in enumerate(selected_seasons):
-            logging.error( "processing %d/%d %ss : %s..." % (index+1, len(selected_seasons), contents_type, season.name()) )
+            logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_seasons), contents_type, season.name()) )
             self.process_episode_section(season)
         #end for season_to_process
     #end process_season_section
@@ -149,7 +149,7 @@ class SectionProcessor:
         for index, partial_episode_metadata in enumerate(selected_episodes):
             episode_metadata_container = self.request_handler.get_metadata_container_for_key(partial_episode_metadata.key)
             episode = EpisodeMetadataParser(self.opts, episode_metadata_container, season)
-            logging.error( "processing %d/%d %ss : %s..." % (index+1, len(selected_episodes), contents_type, episode.name()) )
+            logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_episodes), contents_type, episode.name()) )
             self.tag_file(episode)
         #end for season_to_process
     #end process_season_section
@@ -172,11 +172,11 @@ class SectionProcessor:
         
         any_files_to_tag = len(filepaths_to_tag) == 0
         if any_files_to_tag:
-            logging.error("skipping: no files to tag")
+            logging.warning("skipping: no files to tag")
             return
         #end if len
         
-        logging.error("tagging...")
+        logging.warning("tagging...")
         
         #Create the command line command
         tag_cmd = ['%s' % SublerCLI]
@@ -198,7 +198,7 @@ class SectionProcessor:
             if "Error" in result:
                 logging.critical("Failed: %s" % result.strip())
             else:
-                logging.error("Tagged '%s'" % path)
+                logging.warning("Tagged '%s'" % path)
             #end if "Error"
         #end for paths
     #end tag_file
