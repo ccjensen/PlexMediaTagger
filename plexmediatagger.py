@@ -52,14 +52,14 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "-i", "--interactive", action="store_true", dest="interactive",
                         help="interactivly select files to operate on [default]")
     parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
-                        help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the begining of the file. [default]")
+                        help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the beginning of the file.")
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
                         callback=setLogLevel, help='Increase verbosity')
     parser.add_option(  "-q", "--quiet", action="store_false", dest="quiet",
                         help="For ninja-like processing (Can only be used when in batch mode)")
     parser.add_option(  "-f", "--force-tagging", action="store_true", dest="forcetagging",
                         help="Tags all chosen files, even previously tagged ones")
-    parser.set_defaults( interactive=True, optimize=True, forcetagging=False,
+    parser.set_defaults( interactive=True, optimize=False, forcetagging=False,
                             removetags=False, quiet=False )
     
     opts, args = parser.parse_args()
