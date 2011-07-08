@@ -24,14 +24,78 @@ class SectionProcessor:
         if section_type == "movie":
             self.process_movie_section(section)
         elif section_type == "show":
-            self.processShowSection(section)
+            self.process_show_section(section)
         else:
             logging.error( "'%s' content type is not supported" % sectionType )
         #end if sectionType
     #end process_section
 
+    def get_selection_for_media_container(self, media_container):
+        container_title = media_container.attrib['title1']
+        list_of_items = media_container.getchildren()
+        
+        if not self.opts.interactive:
+            return list_of_items #all
+        #end if not self.opts.interactive
+
+        logging.info( "Type part of the item(s) name or leave empty for full list %s" % container_title )
+        input = raw_input("Item name $")
+        
+        if input == '':
+            logging.info( "List of items in %s" % container_title )
+            filtered_list_of_items = list_of_items
+        else:
+            input = input.lower()
+            logging.info( "List of items in %s matching '%s'" % (container_title, input) )
+            filtered_list_of_items = [item for item in list_of_items if input in item.attrib['title'].lower()]
+        #end if input == 'ALL'
+        
+        for index, item in enumerate(filtered_list_of_items):
+            logging.info( "%d. %s (%s)" % (index, item.attrib['title'], item.attrib['year']) )
+        #end for
+        if len(filtered_list_of_items) == 0:
+            logging.error( "No items found" )
+        else:    
+            logging.warning( "empty input equals all" )
+            
+            #ask user what videos should be processed
+            selection = raw_input("Item # to select $")
+            if selection != '':
+                try:
+                    selection = int(selection)
+                except ValueError, e:
+                    logging.debug(e)
+                    logging.critical("'%s' is not a valid item ID" % input)
+                    sys.exit(1)
+                #end try
+            #end if video_choice
+        #end if len(list_of_videos)
+    
+        if selection == '': #all
+            list_of_selected_items = filtered_list_of_items
+        else:
+            list_of_selected_items = [filtered_list_of_items[selection]]
+        #end if
+        return list_of_selected_items
+    #end def get_selection_for_media_container
 
     def process_movie_section(self, section):
+        section_key = section.attrib['key']
+        contents_container = self.request_handler.get_section_all_container_for_key(section_key)
+    
+        media_container = contents_container.getroot()
+        selected_videos = self.get_selection_for_media_container(media_container)
+        
+        for index, video_to_process in enumerate(selected_videos):
+            url = video_to_process.attrib['key']
+            video_metadata_container = self.request_handler.get_metadata_container_for_key(url)
+            movie = MovieMetadataParser(self.opts, video_metadata_container)
+            logging.info( "processing %d/%d : %s (%s)..." % (index+1, len(selected_videos), movie.title, movie.year) )
+            self.tag_file(movie)
+        #end for videos_to_process
+    #end process_movie_section
+
+    def process_show_section(self, section):
         section_key = section.attrib['key']
         contents_container = self.request_handler.get_section_all_container_for_key(section_key)
     
@@ -43,8 +107,8 @@ class SectionProcessor:
         list_of_videos = videos #all
         
         if self.opts.interactive:
-            logging.info( "Type part of the movie name or leave empty for full list %s" % title )
-            input = raw_input("Movie name $")
+            logging.info( "Type part of the item(s) name or leave empty for full list %s" % title )
+            input = raw_input("Item name $")
             
             if input == '':
                 logging.info( "List of items in %s" % title )
@@ -89,14 +153,6 @@ class SectionProcessor:
             movie = MovieMetadataParser(self.opts, video_metadata_container)
             logging.info( "processing %d/%d : %s (%s)..." % (index+1, len(videos_to_process), movie.title, movie.year) )
             self.tag_file(movie)
-        #end for videos_to_process
-            
-        
-    #end process_movie_section
-
-    def process_show_section(self, section):
-        #TODO: implement
-        return    
     #end processShowSection
     
     def tag_file(self, media_item):
@@ -119,11 +175,11 @@ class SectionProcessor:
                 
                 logging.debug("tag command arguements: %s" % new_tag_cmd)
                 #run SublerCLI using the arguments we have created
-                result = subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+                result = ""#subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
                 if "Error" in result:
-                    logging.critical(result.strip())
+                    logging.critical("Failed: %s" % result.strip())
                 else:
-                    logging.error("Tagged: %s" % media_item.name())
+                    logging.error("Tagged")
                 #end if "Error"
             #end for paths
         return    
