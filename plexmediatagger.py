@@ -92,7 +92,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     title = media_container.attrib['title1']
     sections = media_container.getchildren()
     
-    section_choice = len(sections) #default is count of sections, ie ALL
+    section_choice = '' #default is empty == all
     if opts.interactive:
         logging.info( "List of sections for %s" % title )
         for index, section in enumerate(sections):
