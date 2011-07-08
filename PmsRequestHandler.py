@@ -57,9 +57,6 @@ class PmsRequestHandler(Singleton):
         full_image_url = "%s%s" %(self.base_url(), partial_url)
         escaped_image_url = quote_plus(full_image_url)
         transcoder_image_url = "%s/photo/:/transcode?width=%d&height=%d&url=%s" % (self.base_url(), 1980, 1080, escaped_image_url)
-        image_path = os.path.join(tempfile.gettempdir(), item_name+".jpg")
-        
-        #[NSString stringWithFormat:@"%@/photo/:/transcode?width=%i&height=%i&url=%@", base, (int)sz.width, (int)sz.height
         try:
             f = urlopen(transcoder_image_url)
             temporary_directory = tempfile.gettempdir()
