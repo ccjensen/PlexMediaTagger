@@ -45,7 +45,7 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
     def get_local_image_path(self):
         request_handler = PmsRequestHandler()
         partial_image_url = self.thumb
-        logging.error("Downloading artwork...")
+        logging.info("Downloading artwork...")
         self.local_image_path = request_handler.download_image(self.name(), partial_image_url)
     #end image_path
             

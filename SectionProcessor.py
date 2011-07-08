@@ -101,10 +101,11 @@ class SectionProcessor:
         movies_media_container = contents_container.getroot()
         selected_movies = self.get_selection_for_media_container(movies_media_container)
         
+        contents_type = movies_media_container.get('viewGroup', "")
         for index, partial_movie_metadata in enumerate(selected_movies):
             movie_metadata_container = self.request_handler.get_metadata_container_for_key(partial_movie_metadata.key)
             movie = MovieMetadataParser(self.opts, movie_metadata_container)
-            logging.info( " processing %d/%d : %s..." % (index+1, len(selected_movies), movie.name()) )
+            logging.error( "processing %d/%d %ss : %s..." % (index+1, len(selected_movies), contents_type, movie.name()) )
             self.tag_file(movie)
         #end for videos_to_process
     #end process_movie_section
@@ -116,8 +117,9 @@ class SectionProcessor:
         shows_media_container = shows_container.getroot()
         selected_shows = self.get_selection_for_media_container(shows_media_container)
         
+        contents_type = shows_media_container.get('viewGroup', "")
         for index, show in enumerate(selected_shows):
-            logging.info( " processing %d/%d : %s..." % (index+1, len(selected_shows), show.name()) )
+            logging.error( "processing %d/%d %ss : %s..." % (index+1, len(selected_shows), contents_type, show.name()) )
             self.process_season_section(show)
         #end for show_to_process
     #end process_show_section
@@ -128,9 +130,10 @@ class SectionProcessor:
             
         seasons_media_container = seasons_container.getroot()
         selected_seasons = self.get_selection_for_media_container(seasons_media_container, show)
-            
+        
+        contents_type = seasons_media_container.get('viewGroup', "")
         for index, season in enumerate(selected_seasons):
-            logging.info( " processing %d/%d : %s..." % (index+1, len(selected_seasons), season.name()) )
+            logging.error( "processing %d/%d %ss : %s..." % (index+1, len(selected_seasons), contents_type, season.name()) )
             self.process_episode_section(season)
         #end for season_to_process
     #end process_season_section
@@ -141,45 +144,89 @@ class SectionProcessor:
             
         episodes_media_container = episodes_container.getroot()
         selected_episodes = self.get_selection_for_media_container(episodes_media_container, season)
-            
+        
+        contents_type = episodes_media_container.get('viewGroup', "")
         for index, partial_episode_metadata in enumerate(selected_episodes):
             episode_metadata_container = self.request_handler.get_metadata_container_for_key(partial_episode_metadata.key)
             episode = EpisodeMetadataParser(self.opts, episode_metadata_container, season)
-            logging.info( " processing %d/%d : %s..." % (index+1, len(selected_episodes), episode.name()) )
+            logging.error( "processing %d/%d %ss : %s..." % (index+1, len(selected_episodes), contents_type, episode.name()) )
             self.tag_file(episode)
         #end for season_to_process
     #end process_season_section
     
     def tag_file(self, media_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
-        #TODO: implement
-        if '.m4v' in media_item.file_types or '.mp4' in media_item.file_types:            
-            #get any artwork
-            
-            logging.error("tagging %s" % media_item.name())
-            
-            #Create the command line string
-            tag_cmd = ['%s' % SublerCLI]
-            tag_cmd.append("-t")
-            tag_cmd.append(media_item.tag_string())
-            
-            if self.opts.optimize:
-                tag_cmd.append("-O")
-            #end if self.opts.optimize
-            
-            for paths in media_item.media_paths():
-                new_tag_cmd = tag_cmd
-                new_tag_cmd.append("-i")
-                new_tag_cmd.append(paths)
-                
-                logging.debug("tag command arguements: %s" % new_tag_cmd)
-                #run SublerCLI using the arguments we have created
-                result = subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-                if "Error" in result:
-                    logging.critical("Failed: %s" % result.strip())
-                else:
-                    logging.error("Tagged")
-                #end if "Error"
-            #end for paths
-        return    
-    #end processShowSection
+        filepaths_to_tag = []
+        
+        for path in media_item.media_paths():
+            file_type = os.path.splitext(path)[1]
+            if file_type == '.m4v' or file_type == '.mp4':
+                #check if we want to (re)tag the file no matter what, and if the file is untagged
+                if self.opts.forcetagging or self.isFileUntagged(path, media_item.comments):
+                    filepaths_to_tag.append(path)
+                #end if not self.alreadyTagged
+            else:
+                logging.info("PlexMediaTagger cannot process '%s' files" % file_type)
+            #end if file_type
+        #end for
+        
+        any_files_to_tag = len(filepaths_to_tag) == 0
+        if any_files_to_tag:
+            logging.error("skipping: no files to tag")
+            return
+        #end if len
+        
+        logging.error("tagging...")
+        
+        #Create the command line command
+        tag_cmd = ['%s' % SublerCLI]
+        tag_cmd.append("-t")
+        tag_cmd.append(media_item.tag_string()) #also downloads the artwork
+    
+        if self.opts.optimize:
+            tag_cmd.append("-O")
+        #end if self.opts.optimize
+    
+        for path in filepaths_to_tag:
+            new_tag_cmd = tag_cmd
+            new_tag_cmd.append("-i")
+            new_tag_cmd.append(path)
+        
+            logging.debug("tag command arguements: %s" % new_tag_cmd)
+            #run SublerCLI using the arguments we have created
+            result = subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+            if "Error" in result:
+                logging.critical("Failed: %s" % result.strip())
+            else:
+                logging.error("Tagged '%s'" % path)
+            #end if "Error"
+        #end for paths
+    #end tag_file
+    
+    def isFileUntagged(self, filepath, tagging_marker):
+        """docstring for isFileUntagged"""
+        AtomicParsley = os.path.join(sys.path[0], "AtomicParsley32")
+        
+        #Create the command line string
+        get_tags_cmd = ['%s' % AtomicParsley]
+        get_tags_cmd.append('%s' % filepath)
+        get_tags_cmd.append('-t')
+        
+        #check if file has already been tagged
+        result = subprocess.Popen(get_tags_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+        
+        #error checking
+        if 'AtomicParsley error' in result:
+            logging.critical("Failed to determine file tagged status")
+            return False
+        #end if 'AtomicParsley error' in result:
+        
+        if tagging_marker in result:
+            logging.info("File previously tagged")
+            return False
+        else:
+            logging.info("File untagged")
+            return True
+        #end if tagString in result
+    #end isFileUntagged
+#end SectionProcessor

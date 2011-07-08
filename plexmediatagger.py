@@ -9,14 +9,14 @@
 """
 plexmediatagger.py
 Automatically tags compatible media items.
-Uses data from the PlexMediaServer
+Uses data from the PlexMediaServer (http://www.plexapp.com/)
 
 thanks goes to:
 the Subler team (http://code.google.com/p/subler/) for their excellent CLI tool to used to write the information to the media files
 """
 
 __author__ = "ccjensen/Chris"
-__version__ = "0.01"
+__version__ = "0.5"
 
 import sys
 import os

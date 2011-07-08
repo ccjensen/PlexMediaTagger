@@ -17,7 +17,7 @@ class MediaItemMetadataParser(BaseMetadataParser):
     """docstring for MediaItemMetadataParser"""
     def __init__(self, opts, item_metadata_container):
         super(MediaItemMetadataParser, self).__init__(opts)
-        self.Comments = "Tagged by PlexMediaTagger"
+        self.comments = "Tagged by PlexMediaTagger"
         
         try:
             media_container = item_metadata_container.getroot()
@@ -31,7 +31,6 @@ class MediaItemMetadataParser(BaseMetadataParser):
             #end if len
             self.video = videos[0]
             media_paths = self.media_paths()
-            self.file_types = map(lambda x: os.path.splitext(x)[1], media_paths)
             self.local_image_path = ""
         #end try
     #end def __init__
@@ -61,7 +60,7 @@ class MediaItemMetadataParser(BaseMetadataParser):
     
     def tag_string(self):
         tag_string = ""
-        tag_string += self.new_tag_string_entry("Comments", self.Comments)
+        tag_string += self.new_tag_string_entry("Comments", self.comments)
         return tag_string
     #end def tag_string
     
