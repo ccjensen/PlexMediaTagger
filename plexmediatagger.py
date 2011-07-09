@@ -59,6 +59,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="For ninja-like processing (Can only be used when in batch mode)")
     parser.add_option(  "-f", "--force-tagging", action="store_true", dest="forcetagging",
                         help="Tags all chosen files, even previously tagged ones")
+    parser.add_option(  "-r", "--remove-all-tags", action="store_true", dest="removetags",
+                        help="Removes all compatible tags from the files. Files will have to be retagged.")
     parser.set_defaults( interactive=True, optimize=False, forcetagging=False,
                             removetags=False, quiet=False )
     
@@ -80,6 +82,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     if opts.interactive and not root.isEnabledFor(logging.INFO):
         root.setLevel(logging.INFO)
+    
+    if opts.removetags:
+        logging.critical( "WARNING, TAGS WILL BE REMOVED PERMANENTLY" )
     
     logging.error( "============ Plex Media Tagger Started ============" )
     

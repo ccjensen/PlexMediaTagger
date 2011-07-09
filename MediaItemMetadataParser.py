@@ -66,7 +66,13 @@ class MediaItemMetadataParser(BaseMetadataParser):
     
     def new_tag_string_entry(self, key, value):
         try:
-            #example: "{'Long Description':'blah blah it\'s time to come home blah'}"
+            #example: " blah blah: it's time to {come} home blah   "
+            #becomes: "blah blah&#58; it's time to &#123;come&#125; home blah"
+            cleaned_up_value = value.strip()
+            cleaned_up_value = cleaned_up_value.replace('{', "&#123;")
+            cleaned_up_value = cleaned_up_value.replace('}', "&#125;")
+            cleaned_up_value = cleaned_up_value.replace(':', "&#58;")
+            #example: "'{Long Description:blah blah...}'"
             return '{%s:%s}' % (key, value.strip())
         except AttributeError, e:
             return ""

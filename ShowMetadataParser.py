@@ -34,10 +34,6 @@ class ShowMetadataParser(BaseMetadataParser):
         self.originally_available_at = show_container.get('originallyAvailableAt', "")
         
         self.genre_names = self.array_of_attributes_with_key_from_child_nodes_with_name(show_container, "Genre", "tag")
-        if len(self.genre_names) > 0: 
-            self.genre = self.genre_names[0] 
-        else: 
-            self.genre = ''
         self.genres = ', '.join(self.genre_names)
     #end def __init__
     

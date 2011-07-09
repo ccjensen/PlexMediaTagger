@@ -106,7 +106,7 @@ class SectionProcessor:
             movie_metadata_container = self.request_handler.get_metadata_container_for_key(partial_movie_metadata.key)
             movie = MovieMetadataParser(self.opts, movie_metadata_container)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_movies), contents_type, movie.name()) )
-            self.tag_file(movie)
+            self.process_file(movie)
         #end for videos_to_process
     #end process_movie_section
 
@@ -150,9 +150,65 @@ class SectionProcessor:
             episode_metadata_container = self.request_handler.get_metadata_container_for_key(partial_episode_metadata.key)
             episode = EpisodeMetadataParser(self.opts, episode_metadata_container, season)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_episodes), contents_type, episode.name()) )
-            self.tag_file(episode)
+            self.process_file(episode)
         #end for season_to_process
     #end process_season_section
+    
+    def process_file(self, media_item):
+        if self.opts.removetags:
+            self.remove_tags_from_file(media_item)
+        else:
+            self.tag_file(media_item)
+        #end if opts.removetags
+    #end def process_file
+    
+    def remove_tags_from_file(self, media_item):
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
+        #removal of artwork doesn't seem to work
+        all_tags = ["{Artwork:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}"]
+        filepaths_to_remove_tags = []
+        
+        for path in media_item.media_paths():
+            file_type = os.path.splitext(path)[1]
+            if file_type == '.m4v' or file_type == '.mp4':
+                filepaths_to_remove_tags.append(path)
+            else:
+                logging.info("PlexMediaTagger cannot process '%s' files" % file_type)
+            #end if file_type
+        #end for
+        
+        any_files_to_remove_tags = len(filepaths_to_remove_tags) == 0
+        if any_files_to_remove_tags:
+            logging.warning("skipping: no files to remove tags")
+            return
+        #end if len
+        
+        logging.warning("removing tags...")
+        
+        #Create the command line command
+        tag_cmd = ['%s' % SublerCLI]
+        tag_cmd.append("-t")
+        tag_cmd.append("".join(all_tags))
+    
+        if self.opts.optimize:
+            tag_cmd.append("-O")
+        #end if self.opts.optimize
+    
+        for path in filepaths_to_remove_tags:
+            new_tag_cmd = tag_cmd
+            new_tag_cmd.append("-i")
+            new_tag_cmd.append(path)
+        
+            logging.debug("remove tags command arguements: %s" % new_tag_cmd)
+            #run SublerCLI using the arguments we have created
+            result = subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+            if "Error" in result:
+                logging.critical("Failed: %s" % result.strip())
+            else:
+                logging.warning("Tags removed from '%s'" % path)
+            #end if "Error"
+        #end for paths
+    #end remove_tags_from_file
     
     def tag_file(self, media_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
