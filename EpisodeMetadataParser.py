@@ -66,7 +66,7 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
         tag_string += self.new_tag_string_entry("Release Date", self.originally_available_at)
         tag_string += self.new_tag_string_entry("Description", self.summary)
         
-        tag_string += self.new_tag_string_entry("Genre", self.show.genres)
+        tag_string += self.new_tag_string_entry("Genre", self.show.genre) #single genre
         tag_string += self.new_tag_string_entry("Screenwriters", self.writers)
         tag_string += self.new_tag_string_entry("Director", self.directors)
         

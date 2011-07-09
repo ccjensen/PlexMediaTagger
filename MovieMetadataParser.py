@@ -31,6 +31,10 @@ class MovieMetadataParser(MediaItemMetadataParser):
         self.originally_available_at = self.video.get('originallyAvailableAt', "")
         
         self.genre_names = self.array_of_attributes_with_key_from_child_nodes_with_name(self.video, "Genre", "tag")
+        if len(self.genre_names) > 0: 
+            self.genre = self.genre_names[0] 
+        else: 
+            self.genre = ''
         self.genres = ', '.join(self.genre_names)
         
         self.writer_names = self.array_of_attributes_with_key_from_child_nodes_with_name(self.video, "Writer", "tag")
@@ -72,7 +76,7 @@ class MovieMetadataParser(MediaItemMetadataParser):
         tag_string += self.new_tag_string_entry("Release Date", self.originally_available_at)
         tag_string += self.new_tag_string_entry("Description", self.tagline if len(self.tagline) > 0 else self.summary)
         
-        tag_string += self.new_tag_string_entry("Genre", self.genres)
+        tag_string += self.new_tag_string_entry("Genre", self.genre) #single genre
         tag_string += self.new_tag_string_entry("Screenwriters", self.writers)
         tag_string += self.new_tag_string_entry("Director", self.directors)
         tag_string += self.new_tag_string_entry("Cast", self.cast)
