@@ -65,24 +65,21 @@ class MovieMetadataParser(MediaItemMetadataParser):
         if self.local_image_path == "":
             self.get_local_image_path()
         tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
-        
-        tag_string += self.new_tag_string_entry("Studio", self.studio)
-        
         tag_string += self.new_tag_string_entry("Media Kind", "Movie")
-        
-        tag_string += self.new_tag_string_entry("Name", self.title)
-        tag_string += self.new_tag_string_entry("Rating", self.content_rating)
-        tag_string += self.new_tag_string_entry("Long Description", self.summary)
-        tag_string += self.new_tag_string_entry("Release Date", self.originally_available_at)
-        tag_string += self.new_tag_string_entry("Description", self.tagline if len(self.tagline) > 0 else self.summary)
-        
-        tag_string += self.new_tag_string_entry("Genre", self.genre) #single genre
-        tag_string += self.new_tag_string_entry("Screenwriters", self.writers)
-        tag_string += self.new_tag_string_entry("Director", self.directors)
-        tag_string += self.new_tag_string_entry("Cast", self.cast)
-        
         hd_value = "%d" % (1 if self.is_HD() else 0)
         tag_string += self.new_tag_string_entry("HD Video", hd_value)
+        
+        tag_string += self.new_tag_string_entry("Name", self.title)
+        tag_string += self.new_tag_string_entry("Artist", self.directors)
+        tag_string += self.new_tag_string_entry("Genre", self.genre) #single genre
+        tag_string += self.new_tag_string_entry("Release Date", self.originally_available_at)
+        tag_string += self.new_tag_string_entry("Description", self.tagline if len(self.tagline) > 0 else self.summary)
+        tag_string += self.new_tag_string_entry("Long Description", self.summary)
+        tag_string += self.new_tag_string_entry("Rating", self.content_rating)
+        tag_string += self.new_tag_string_entry("Cast", self.cast)
+        tag_string += self.new_tag_string_entry("Director", self.directors)
+        tag_string += self.new_tag_string_entry("Screenwriters", self.writers)
+        tag_string += self.new_tag_string_entry("Studio", self.studio)
         
         return tag_string.strip()
     #end def tag_string

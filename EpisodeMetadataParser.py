@@ -56,8 +56,8 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
         
         if self.local_image_path == "":
             self.get_local_image_path()
-        tag_string += self.new_tag_string_entry("Media Kind", "TV Show")
         tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
+        tag_string += self.new_tag_string_entry("Media Kind", "TV Show")
         hd_value = "%d" % (1 if self.is_HD() else 0)
         tag_string += self.new_tag_string_entry("HD Video", hd_value)
         
