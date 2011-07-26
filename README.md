@@ -13,7 +13,7 @@ Retrieve the tool and its support files with:
 
 The tool requires python (pre-installed on Snow Leopard) and a python module called lxml. lxml was successfully installed on my system using:
     
-    sudo env ARCHFLAGS="-arch i386 -arch x86_64" easy_install lxml
+    sudo env ARCHFLAGS="-arch i386 -arch x86_64" easy_install --allow-hosts=lxml.de,*.python.org lxml
 
 ## Usage: 
 
