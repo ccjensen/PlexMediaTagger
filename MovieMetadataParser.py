@@ -24,7 +24,7 @@ class MovieMetadataParser(MediaItemMetadataParser):
         self.title = self.video.get('title', "")
         self.content_rating = self.video.get('contentRating', "") #PG-13, etc.
         self.summary = self.video.get('summary', "")
-        self.rating = self.video.get('rating', "") #not used
+        self.rating = self.video.get('rating', "")
         self.year = self.video.get('year', "")
         self.tagline = self.video.get('tagline', "")
         self.thumb = self.video.get('thumb', "")

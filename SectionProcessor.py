@@ -9,7 +9,6 @@
 from lxml import etree
 import logging
 import sys
-import subprocess
 from MovieMetadataParser import *
 from ShowMetadataParser import *
 from SeasonMetadataParser import *
@@ -70,6 +69,7 @@ class SectionProcessor:
         #end for
         if len(filtered_list_of_items) == 0:
             logging.error( "No items found" )
+            return []
         else:    
             logging.warning( "empty input equals all" )
             
@@ -106,7 +106,7 @@ class SectionProcessor:
             movie_metadata_container = self.request_handler.get_metadata_container_for_key(partial_movie_metadata.key)
             movie = MovieMetadataParser(self.opts, movie_metadata_container)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_movies), contents_type, movie.name()) )
-            self.process_file(movie)
+            self.process_item(movie)
         #end for videos_to_process
     #end process_movie_section
 
@@ -150,139 +150,23 @@ class SectionProcessor:
             episode_metadata_container = self.request_handler.get_metadata_container_for_key(partial_episode_metadata.key)
             episode = EpisodeMetadataParser(self.opts, episode_metadata_container, season)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_episodes), contents_type, episode.name()) )
-            self.process_file(episode)
+            self.process_item(episode)
         #end for season_to_process
     #end process_season_section
     
-    def process_file(self, media_item):
-        if self.opts.removetags:
-            self.remove_tags_from_file(media_item)
-        else:
-            self.tag_file(media_item)
-        #end if opts.removetags
-    #end def process_file
-    
-    def remove_tags_from_file(self, media_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
-        #removal of artwork doesn't seem to work
-        all_tags = ["{Artwork:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}"]
-        filepaths_to_remove_tags = []
-        
-        for path in media_item.media_paths():
-            file_type = os.path.splitext(path)[1]
-            if file_type == '.m4v' or file_type == '.mp4':
-                filepaths_to_remove_tags.append(path)
+    def process_item(self, media_item):
+        skipped_all = True
+        for media_part in media_item.media_parts:
+            if media_part.canTag:
+                skipped_all = False
+            #end if canTag
+            if self.opts.removetags:
+                media_part.remove_tags()
             else:
-                logging.info("PlexMediaTagger cannot process '%s' files" % file_type)
-            #end if file_type
-        #end for
-        
-        any_files_to_remove_tags = len(filepaths_to_remove_tags) == 0
-        if any_files_to_remove_tags:
-            logging.warning("skipping: no files to remove tags")
-            return
-        #end if len
-        
-        logging.warning("removing tags...")
-        
-        #Create the command line command
-        tag_cmd = ['%s' % SublerCLI]
-        tag_cmd.append("-t")
-        tag_cmd.append("".join(all_tags))
-    
-        if self.opts.optimize:
-            tag_cmd.append("-O")
-        #end if self.opts.optimize
-    
-        for path in filepaths_to_remove_tags:
-            new_tag_cmd = tag_cmd
-            new_tag_cmd.append("-i")
-            new_tag_cmd.append(path)
-        
-            logging.debug("remove tags command arguements: %s" % new_tag_cmd)
-            #run SublerCLI using the arguments we have created
-            result = subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-            if "Error" in result:
-                logging.critical("Failed: %s" % result.strip())
-            else:
-                logging.warning("Tags removed from '%s'" % path)
-            #end if "Error"
-        #end for paths
-    #end remove_tags_from_file
-    
-    def tag_file(self, media_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
-        filepaths_to_tag = []
-        
-        for path in media_item.media_paths():
-            file_type = os.path.splitext(path)[1]
-            if file_type == '.m4v' or file_type == '.mp4':
-                #check if we want to (re)tag the file no matter what, and if the file is untagged
-                if self.opts.forcetagging or self.isFileUntagged(path, media_item.comments):
-                    filepaths_to_tag.append(path)
-                #end if not self.alreadyTagged
-            else:
-                logging.info("PlexMediaTagger cannot process '%s' files" % file_type)
-            #end if file_type
-        #end for
-        
-        any_files_to_tag = len(filepaths_to_tag) == 0
-        if any_files_to_tag:
+                media_part.tag()
+        #end for media_part
+        if skipped_all:
             logging.warning("skipping: no files to tag")
-            return
-        #end if len
-        
-        logging.warning("tagging...")
-        
-        #Create the command line command
-        tag_cmd = ['%s' % SublerCLI]
-        tag_cmd.append("-t")
-        tag_cmd.append(media_item.tag_string()) #also downloads the artwork
-    
-        if self.opts.optimize:
-            tag_cmd.append("-O")
-        #end if self.opts.optimize
-    
-        for path in filepaths_to_tag:
-            new_tag_cmd = tag_cmd
-            new_tag_cmd.append("-i")
-            new_tag_cmd.append(path)
-        
-            logging.debug("tag command arguements: %s" % new_tag_cmd)
-            #run SublerCLI using the arguments we have created
-            result = subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-            if "Error" in result:
-                logging.critical("Failed: %s" % result.strip())
-            else:
-                logging.warning("Tagged '%s'" % path)
-            #end if "Error"
-        #end for paths
-    #end tag_file
-    
-    def isFileUntagged(self, filepath, tagging_marker):
-        """docstring for isFileUntagged"""
-        AtomicParsley = os.path.join(sys.path[0], "AtomicParsley32")
-        
-        #Create the command line string
-        get_tags_cmd = ['%s' % AtomicParsley]
-        get_tags_cmd.append('%s' % filepath)
-        get_tags_cmd.append('-t')
-        
-        #check if file has already been tagged
-        result = subprocess.Popen(get_tags_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-        
-        #error checking
-        if 'AtomicParsley error' in result:
-            logging.critical("Failed to determine file tagged status")
-            return False
-        #end if 'AtomicParsley error' in result:
-        
-        if tagging_marker in result:
-            logging.info("File previously tagged")
-            return False
-        else:
-            logging.info("File untagged")
-            return True
-        #end if tagString in result
-    #end isFileUntagged
+        #end if skipped_all
+    #end def process_item
 #end SectionProcessor

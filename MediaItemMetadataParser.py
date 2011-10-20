@@ -12,13 +12,12 @@ import sys
 import os
 from PmsRequestHandler import *
 from BaseMetadataParser import *
+from MediaPart import *
 
 class MediaItemMetadataParser(BaseMetadataParser):
     """docstring for MediaItemMetadataParser"""
     def __init__(self, opts, item_metadata_container):
         super(MediaItemMetadataParser, self).__init__(opts)
-        self.comments = "Tagged by PlexMediaTagger"
-        
         try:
             media_container = item_metadata_container.getroot()
         except AttributeError, e:
@@ -30,8 +29,10 @@ class MediaItemMetadataParser(BaseMetadataParser):
                 return
             #end if len
             self.video = videos[0]
-            media_paths = self.media_paths()
+            self.media_parts = self.media_parts()
             self.local_image_path = ""
+            self.updated_at = self.video.get('updatedAt', "")
+            self.view_count = self.video.get('viewCount', "0")
         #end try
     #end def __init__
     
@@ -47,10 +48,16 @@ class MediaItemMetadataParser(BaseMetadataParser):
         return "Generic Name"
     #end def name
     
-    def media_paths(self):
+    def media_parts(self):
         media_node = self.video.find("Media")
-        return self.array_of_attributes_with_key_from_child_nodes_with_name(media_node, "Part", "file")
-    #end isHD
+        media_paths = self.array_of_attributes_with_key_from_child_nodes_with_name(media_node, "Part", "file")
+        media_parts = []
+        for path in media_paths:
+            media_part = MediaPart(self.opts, self, path)
+            media_parts.append(media_part)
+        #end for
+        return media_parts
+    #end media_parts
 
     def is_HD(self):
         mediaNode = self.video.find("Media")
@@ -60,7 +67,7 @@ class MediaItemMetadataParser(BaseMetadataParser):
     
     def tag_string(self):
         tag_string = ""
-        tag_string += self.new_tag_string_entry("Comments", self.comments)
+        tag_string += self.new_tag_string_entry("Comments", self.media_parts[0].getCommentTagContents())
         return tag_string
     #end def tag_string
     

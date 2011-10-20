@@ -25,7 +25,7 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
         self.title = self.video.get('title', "")
         self.summary = self.video.get('summary', "")
         self.index = self.video.get('index', "")
-        self.rating = self.video.get('rating', "") #not used        
+        self.rating = self.video.get('rating', "")
         self.thumb = self.video.get('thumb', "")
         self.originally_available_at = self.video.get('originallyAvailableAt', "")
 
