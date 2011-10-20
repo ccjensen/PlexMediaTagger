@@ -1,0 +1,4 @@
+These scripts can be installed into iTunes by placing them into:
+/Users/<your user's home folder>/Library/iTunes/Scripts
+
+Next time you run iTunes, you should have an additional menu item that looks like a scroll of paper. Run the script by selecting the items in iTunes that you want it to process, then select the menu option.
