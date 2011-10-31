@@ -20,7 +20,7 @@ class MediaPart(object):
         self.file_type = os.path.splitext(self.path)[1]
         
         self.tag_data_delimiter = "::::"
-        self.itunes_tag_data_token = "I_T_U_N_E_S" + self.tag_data_delimiter
+        self.itunes_tag_data_token = "I_T_U_N_E_S"
         self.itunes_rating_token = "R_"
         self.itunes_playcount_token = "PC_"
         self.updated_at_token = "D_"
@@ -43,7 +43,19 @@ class MediaPart(object):
         for word in self.comment_tag_contents.split(" "):
             if word.startswith(self.itunes_tag_data_token):
                 logging.info("File previously tagged")
-                return False
+                for item in word.split(self.tag_data_delimiter):
+                    if item.startswith(self.updated_at_token):
+                        tag_data_updated_at = item.split(self.updated_at_token)[1]
+                        metadata_updated_at = self.media_item.updated_at
+                        if (metadata_updated_at > tag_data_updated_at):
+                            logging.info("Metadata has changed since last time")
+                            return True
+                        else:
+                            logging.info("No change to the metadata since last time")
+                            return False
+                    #end inf
+                #end for
+                logging.info("Updated at token missing, will re-tag the file")
         return True
     #end def shouldTag
     
@@ -74,16 +86,6 @@ class MediaPart(object):
         return ""
         #end if tagString in result
     #end getFileCommentTagContents
-    
-    def getCommentTagContents(self):
-        rating = int( float(self.media_item.rating) * 10 )
-        rating_str = "%s%i" % (self.itunes_rating_token, rating)
-        play_count_str = self.itunes_playcount_token + self.media_item.view_count
-        updated_at_str = self.updated_at_token + self.media_item.updated_at
-        itunes = [self.itunes_tag_data_token, rating_str, play_count_str, updated_at_str]
-        itunes_str = self.tag_data_delimiter.join(itunes)
-        return itunes_str
-    #end getCommentTagContents
     
     def remove_tags(self):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")

@@ -65,9 +65,20 @@ class MediaItemMetadataParser(BaseMetadataParser):
         return resolution.isdigit() and int(resolution) >= 720
     #end isHD
     
+    def getCommentTagContents(self):
+        media_part = self.media_parts[0]
+        rating = int( float(self.rating) * 10 )
+        rating_str = "%s%i" % (media_part.itunes_rating_token, rating)
+        play_count_str = media_part.itunes_playcount_token + self.view_count
+        updated_at_str = media_part.updated_at_token + self.updated_at
+        itunes = [media_part.itunes_tag_data_token, rating_str, play_count_str, updated_at_str]
+        itunes_str = media_part.tag_data_delimiter.join(itunes)
+        return itunes_str
+    #end getCommentTagContents
+    
     def tag_string(self):
         tag_string = ""
-        tag_string += self.new_tag_string_entry("Comments", self.media_parts[0].getCommentTagContents())
+        tag_string += self.new_tag_string_entry("Comments", self.getCommentTagContents())
         return tag_string
     #end def tag_string
     
