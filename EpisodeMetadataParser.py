@@ -40,12 +40,7 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
     #end def __init__
     
     def name(self):
-        if self.season.index != "":
-            season_index = self.season.index
-        else:
-            season_index = self.parent_index
-        #end if
-        return "%s - S%02dE%02d - %s" % (self.season.show.name(), int(season_index), int(self.index), self.title)
+        return "%s - S%02dE%02d - %s" % (self.season.show.name(), int(self.season.index), int(self.index), self.title)
     #end def name
     
     def get_local_image_path(self):
