@@ -25,6 +25,7 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
         self.title = self.video.get('title', "")
         self.summary = self.video.get('summary', "")
         self.index = self.video.get('index', "")
+        self.parent_index = self.video.get('parentIndex', "")
         self.rating = self.video.get('rating', "")
         self.thumb = self.video.get('thumb', "")
         self.originally_available_at = self.video.get('originallyAvailableAt', "")
@@ -39,7 +40,12 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
     #end def __init__
     
     def name(self):
-        return "%sE%02d - %s" % (self.season.name(), int(self.index), self.title)
+        if self.season.index != "":
+            season_index = self.season.index
+        else:
+            season_index = self.parent_index
+        #end if
+        return "%s - S%02dE%02d - %s" % (self.season.show.name(), int(season_index), int(self.index), self.title)
     #end def name
     
     def get_local_image_path(self):
@@ -58,7 +64,7 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
             self.get_local_image_path()
         tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
         tag_string += self.new_tag_string_entry("Media Kind", "TV Show")
-        hd_value = "%d" % (1 if self.is_HD() else 0)
+        hd_value = "%d" % (1 if self.media_parser.is_HD else 0)
         tag_string += self.new_tag_string_entry("HD Video", hd_value)
         
         tag_string += self.new_tag_string_entry("Name", self.title)

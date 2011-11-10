@@ -41,41 +41,43 @@ def main():
     root.addHandler(ColorizingStreamHandler())
     
     parser = OptionParser(usage="\
-%prog [options] [alternate IP/Domain (default is localhost)] [port number (default is 32400)]\n\
-Example: %prog -of 192.168.0.2 55400\n\
+%prog [options]\n\
+Example 1: %prog --tag\n\
+Example 2: %prog -bq --tag --remove-all-tags --optimize -ip 192.168.0.2 --port 55400\n\
 %prog -h for full list of options\n\n\
 Filepaths to media items in PMS need to be the same as on machine that is running this script.\
 ")
+    parser.add_option(  "-t", "--tag", action="store_true", dest="tag",
+                        help="Will tag all compatible file types, and will update any previously tagged files (if metadata in plex has changed).")
+    parser.add_option(  "-r", "--remove-all-tags", action="store_true", dest="removetags",
+                        help="Removes all compatible tags from the files. Files will have to be retagged.")
+    parser.add_option(  "-f", "--force", action="store_true", dest="force",
+                        help="Ignores previous work and steams ahead with task (like tagging previously tagged files, etc.)")
+    parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
+                        help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the beginning of the file.")
+                        
+    parser.add_option(  "-i", "--ip", action="store", dest="ip", type='string',
+                        help="Specifies an alternate IP address that hosts a PMS that we wish to connect to (default is localhost).")
+    parser.add_option(  "-p", "--port", action="store", dest="port", type='int',
+                        help="Specifies an alternate port number to use when connecting to the PMS (default is 32400).")
     
     parser.add_option(  "-b", "--batch", action="store_false", dest="interactive",
                         help="Disables interactive. Requires no human intervention once launched, and will perform operations on all files")
-    parser.add_option(  "-i", "--interactive", action="store_true", dest="interactive",
+    parser.add_option(  "--interactive", action="store_true", dest="interactive",
                         help="interactivly select files to operate on [default]")
-    parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
-                        help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the beginning of the file.")
+
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
                         callback=setLogLevel, help='Increase verbosity')
     parser.add_option(  "-q", "--quiet", action="store_true", dest="quiet",
                         help="For ninja-like processing (Can only be used when in batch mode)")
-    parser.add_option(  "-f", "--force-tagging", action="store_true", dest="forcetagging",
-                        help="Tags all chosen files, even previously tagged ones")
-    parser.add_option(  "-r", "--remove-all-tags", action="store_true", dest="removetags",
-                        help="Removes all compatible tags from the files. Files will have to be retagged.")
-    parser.set_defaults( interactive=True, optimize=False, forcetagging=False,
-                            removetags=False, quiet=False )
+
+    parser.set_defaults( tag=False, remove_tags=False, optimize=False, force_tagging=False, interactive=True, quiet=False,
+                        ip="localhost", port=32400)
     
     opts, args = parser.parse_args()
     
-    ip = "localhost"
-    port = "32400"
-    if len(args) == 1:
-        ip = args[0]
-    if len(args) == 2:
-        ip = args[0]
-        port = args[1]
-    elif len(args) > 2:
-        parser.error("Provide only one IP/Domain and port number")
-    #end if args
+    if not opts.tag and not opts.removetags and not opts.optimize:
+        parser.error("No task to perform. Our work here is done...")
     
     if opts.quiet:
         root.setLevel(logging.ERROR)
@@ -89,12 +91,12 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     logging.error( "============ Plex Media Tagger Started ============" )
     
     request_handler = PmsRequestHandler()
-    request_handler.ip = ip
-    request_handler.port = port
+    request_handler.ip = opts.ip
+    request_handler.port = opts.port
     
     section_processor = SectionProcessor(opts, request_handler)
     
-    logging.error( "Connecting to PMS at %s:%s" % (ip, port) )
+    logging.error( "Connecting to PMS at %s:%d" % (opts.ip, opts.port) )
     sections_container = request_handler.getSectionsContainer()
     media_container = sections_container.getroot()
     title = media_container.attrib['title1']

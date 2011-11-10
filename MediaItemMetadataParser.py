@@ -12,7 +12,7 @@ import sys
 import os
 from PmsRequestHandler import *
 from BaseMetadataParser import *
-from MediaPart import *
+from MediaMetadataParser import *
 
 class MediaItemMetadataParser(BaseMetadataParser):
     """docstring for MediaItemMetadataParser"""
@@ -29,10 +29,12 @@ class MediaItemMetadataParser(BaseMetadataParser):
                 return
             #end if len
             self.video = videos[0]
-            self.media_parts = self.media_parts()
             self.local_image_path = ""
             self.updated_at = self.video.get('updatedAt', "")
             self.view_count = self.video.get('viewCount', "0")
+            
+            media_node = self.video.find("Media")
+            self.media_parser = MediaMetadataParser(self.opts, self, media_node)
         #end try
     #end def __init__
     
@@ -47,23 +49,6 @@ class MediaItemMetadataParser(BaseMetadataParser):
     def name(self):
         return "Generic Name"
     #end def name
-    
-    def media_parts(self):
-        media_node = self.video.find("Media")
-        media_paths = self.array_of_attributes_with_key_from_child_nodes_with_name(media_node, "Part", "file")
-        media_parts = []
-        for path in media_paths:
-            media_part = MediaPart(self.opts, self, path)
-            media_parts.append(media_part)
-        #end for
-        return media_parts
-    #end media_parts
-
-    def is_HD(self):
-        mediaNode = self.video.find("Media")
-        resolution = mediaNode.attrib['videoResolution']
-        return resolution.isdigit() and int(resolution) >= 720
-    #end isHD
     
     def getCommentTagContents(self):
         media_part = self.media_parts[0]

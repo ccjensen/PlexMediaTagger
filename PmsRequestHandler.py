@@ -32,7 +32,7 @@ class PmsRequestHandler(Singleton):
             contents = etree.parse(url)
         except IOError, e:
             logging.debug(e)
-            logging.critical("Could not connect to server %s:%s" % (self.ip, self.port))
+            logging.critical("Could not connect to server %s:%d" % (self.ip, self.port))
             sys.exit(1)
         #end try
         return contents

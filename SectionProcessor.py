@@ -13,9 +13,10 @@ from MovieMetadataParser import *
 from ShowMetadataParser import *
 from SeasonMetadataParser import *
 from EpisodeMetadataParser import *
+from MediaItemProcessor import *
 
 class SectionProcessor:
-    """docstring for PmsRequestHandler"""
+    """docstring for SectionProcessor"""
     def __init__(self, opts, request_handler):
         self.opts = opts
         self.request_handler = request_handler
@@ -106,7 +107,8 @@ class SectionProcessor:
             movie_metadata_container = self.request_handler.get_metadata_container_for_key(partial_movie_metadata.key)
             movie = MovieMetadataParser(self.opts, movie_metadata_container)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_movies), contents_type, movie.name()) )
-            self.process_item(movie)
+            media_item_processor = MediaItemProcessor(self.opts, movie)
+            media_item_processor.process()
         #end for videos_to_process
     #end process_movie_section
 
@@ -150,23 +152,8 @@ class SectionProcessor:
             episode_metadata_container = self.request_handler.get_metadata_container_for_key(partial_episode_metadata.key)
             episode = EpisodeMetadataParser(self.opts, episode_metadata_container, season)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_episodes), contents_type, episode.name()) )
-            self.process_item(episode)
+            media_item_processor = MediaItemProcessor(self.opts, episode)
+            media_item_processor.process()
         #end for season_to_process
     #end process_season_section
-    
-    def process_item(self, media_item):
-        skipped_all = True
-        for media_part in media_item.media_parts:
-            if media_part.canTag:
-                skipped_all = False
-            #end if canTag
-            if self.opts.removetags:
-                media_part.remove_tags()
-            else:
-                media_part.tag()
-        #end for media_part
-        if skipped_all:
-            logging.warning("skipping: no files to tag")
-        #end if skipped_all
-    #end def process_item
 #end SectionProcessor

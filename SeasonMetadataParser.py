@@ -24,9 +24,10 @@ class SeasonMetadataParser(BaseMetadataParser):
         self.title = season_container.get('title', "")
         self.index = season_container.get('index', "")
         self.thumb = season_container.get('thumb', "")
+        self.leaf_count = season_container.get('leafCount', "1")
     #end def __init__
     
     def name(self):
-        return "%s - S%02d" % (self.show.name(), int(self.index))
+        return "%s - %s" % (self.show.name(), self.title)
     #end def name
 #end class SeasonMetadataParser

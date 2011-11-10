@@ -18,11 +18,11 @@ class BaseMetadataParser(object):
         self.opts = opts
     #end def __init__
     
-    def array_of_attributes_with_key_from_child_nodes_with_name(self, video, node_name, key):
+    def array_of_attributes_with_key_from_child_nodes_with_name(self, node, node_name, key):
         result = [""]
-        nodes = video.findall(node_name)
-        if len(nodes) > 0:
-            result = map(lambda n: n.attrib[key], nodes)
+        subnodes = node.findall(node_name)
+        if len(subnodes) > 0:
+            result = map(lambda n: n.attrib[key], subnodes)
         return result
-    #end def arrayOfTagAttributesFromNodesWithName
+    #end def array_of_attributes_with_key_from_child_nodes_with_name
 #end class MetadataParser
