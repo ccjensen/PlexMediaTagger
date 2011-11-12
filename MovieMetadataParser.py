@@ -17,6 +17,8 @@ class MovieMetadataParser(MediaItemMetadataParser):
     """docstring for MovieMetadataParser"""
     def __init__(self, opts, movie_metadata_container):
         super(MovieMetadataParser, self).__init__(opts, movie_metadata_container)
+        media_node = self.video.find("Media")
+        self.media_parser = MediaMetadataParser(self.opts, self, media_node)
         
         self.key = self.video.attrib['key']
         self.studio = self.video.get('studio', "")

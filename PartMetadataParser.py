@@ -8,6 +8,7 @@
 
 from lxml import etree
 from BaseMetadataParser import *
+from StreamMetadataParser import *
 
 class PartMetadataParser(BaseMetadataParser):
     """docstring for PartMetadataParser"""
@@ -23,11 +24,17 @@ class PartMetadataParser(BaseMetadataParser):
         self.duration = self.part_node.attrib['duration']
         self.size = self.part_node.attrib['size']
         
-        stream_nodes = self.part_node.find("Stream")
+        stream_nodes = self.part_node.findall("Stream")
         self.stream_parsers = []
         for stream_node in stream_nodes:
             stream_parser = StreamMetadataParser(self.opts, self, stream_node)
             self.stream_parsers.append(stream_parser)
         #end for stream_nodes
-    #end def __init__    
+    #end def __init__
+    
+    def tag_string(self):
+        tag_string = self.media_parser.tag_string()
+        return tag_string
+    #end def tag_string
+    
 #end class PartMetadataParser

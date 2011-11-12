@@ -24,4 +24,13 @@ class MediaMetadataParser(BaseMetadataParser):
         part_node = self.media_node.find("Part")
         self.part_parser = PartMetadataParser(self.opts, self, part_node)
     #end def __init__
+    
+    def tag_string(self):
+        tag_string = self.media_item.tag_string()
+        
+        hd_value = "%d" % (1 if self.is_HD else 0)
+        tag_string += self.new_tag_string_entry("HD Video", hd_value)
+        
+        return tag_string
+    #end def tag_string
 #end class MediaParser

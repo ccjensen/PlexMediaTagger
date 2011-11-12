@@ -44,4 +44,19 @@ class ShowMetadataParser(BaseMetadataParser):
     def name(self):
         return "%s (%s)" % (self.title, self.year)
     #end def name
+    
+    def tag_string(self):
+        tag_string = ""
+        tag_string += self.new_tag_string_entry("Media Kind", "TV Show")
+        tag_string += self.new_tag_string_entry("Artist", self.title)
+        tag_string += self.new_tag_string_entry("Album Artist", self.title)
+        
+        #Example: "The X-Files, Season 1"
+        tag_string += self.new_tag_string_entry("Genre", self.genre) #single genre
+        tag_string += self.new_tag_string_entry("TV Show", self.title)
+        tag_string += self.new_tag_string_entry("TV Network", self.studio)
+        tag_string += self.new_tag_string_entry("Rating", self.content_rating)
+        
+        return tag_string.strip()
+    #end def tag_string
 #end class ShowMetadataParser

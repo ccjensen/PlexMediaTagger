@@ -17,6 +17,9 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
     """docstring for EpisodeMetadataParser"""
     def __init__(self, opts, episode_metadata_container, season):
         super(EpisodeMetadataParser, self).__init__(opts, episode_metadata_container)
+        media_node = self.video.find("Media")
+        self.media_parser = MediaMetadataParser(self.opts, self, media_node)
+        
         self.season = season
         self.show = season.show
         
@@ -53,39 +56,25 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
             
     
     def tag_string(self):
-        tag_string = super(EpisodeMetadataParser, self).tag_string()
-        
         if self.local_image_path == "":
             self.get_local_image_path()
-        tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
-        tag_string += self.new_tag_string_entry("Media Kind", "TV Show")
-        hd_value = "%d" % (1 if self.media_parser.is_HD else 0)
-        tag_string += self.new_tag_string_entry("HD Video", hd_value)
+
+        tag_string = self.season.tag_string()
         
+        tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)        
         tag_string += self.new_tag_string_entry("Name", self.title)
-        tag_string += self.new_tag_string_entry("Artist", self.show.title)
-        tag_string += self.new_tag_string_entry("Album Artist", self.show.title)
-        
-        #Example: "The X-Files, Season 1"
-        tag_string += self.new_tag_string_entry("Album", self.show.title+", "+self.season.title)
-        tag_string += self.new_tag_string_entry("Genre", self.show.genre) #single genre        
         tag_string += self.new_tag_string_entry("Release Date", self.originally_available_at)
         tag_string += self.new_tag_string_entry("Track #", self.index+"/"+self.index)
-        tag_string += self.new_tag_string_entry("Disk #", self.season.index)
-        tag_string += self.new_tag_string_entry("TV Show", self.show.title)
         tag_string += self.new_tag_string_entry("TV Episode #", self.index)
-        tag_string += self.new_tag_string_entry("TV Network", self.show.studio)
         tag_string += self.new_tag_string_entry("TV Episode ID", self.season.index+self.index)
-        tag_string += self.new_tag_string_entry("TV Season", self.season.index)
         tag_string += self.new_tag_string_entry("Description", self.summary)        
-        tag_string += self.new_tag_string_entry("Long Description", self.summary)        
-        tag_string += self.new_tag_string_entry("Rating", self.show.content_rating)        
-
+        tag_string += self.new_tag_string_entry("Long Description", self.summary)
+        
         tag_string += self.new_tag_string_entry("Screenwriters", self.writers)
         tag_string += self.new_tag_string_entry("Director", self.directors)
         
         #no cast currently available for show/season/episode
-        #tag_string += self.new_tag_string_entry("Cast", self.cast)
+        #tag_string += self.new_tag_string_entry("Cast", self.cast)        
         
         return tag_string.strip()
     #end def tag_string

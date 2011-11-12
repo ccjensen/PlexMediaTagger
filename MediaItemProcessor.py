@@ -9,6 +9,8 @@
 from lxml import etree
 import logging
 import sys
+import os
+import subprocess
 from MovieMetadataParser import *
 from ShowMetadataParser import *
 from SeasonMetadataParser import *
@@ -39,11 +41,11 @@ class MediaItemProcessor:
     #end def canTag
     
     def shouldTag(self, part_parser):
-        if self.opts.forcetagging:
+        if self.opts.force:
             return True
         
-        self.comment_tag_contents = self.getFileCommentTagContents(part_parser)
-        for word in part_parser.comment_tag_contents.split(" "):
+        comment_tag_contents = self.getFileCommentTagContents(part_parser)
+        for word in comment_tag_contents.split(" "):
             if word.startswith(self.itunes_tag_data_token):
                 logging.info("File previously tagged")
                 for item in word.split(self.tag_data_delimiter):
@@ -116,6 +118,17 @@ class MediaItemProcessor:
         #end if "Error"
     #end remove_tags
     
+    def create_new_comment_tag_contents(self, part_parser):
+        media_parser = part_parser.media_parser
+        rating = int( float(media_parser.rating) * 10 )
+        rating_str = "%s%i" % (self.itunes_rating_token, rating)
+        play_count_str = self.itunes_playcount_token + media_parser.view_count
+        updated_at_str = self.updated_at_token + media_parser.updated_at
+        itunes = [self.itunes_tag_data_token, rating_str, play_count_str, updated_at_str]
+        itunes_str = self.tag_data_delimiter.join(itunes)
+        return itunes_str
+    #end create_new_comment_tag_contents
+    
     def tag(self, part_parser):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         
@@ -124,7 +137,7 @@ class MediaItemProcessor:
         #Create the command line command
         tag_cmd = ['%s' % SublerCLI]
         tag_cmd.append("-t")
-        tag_cmd.append(part_parser.media_item.tag_string()) #also downloads the artwork
+        tag_cmd.append(part_parser.tag_string()) #also downloads the artwork
         
         new_tag_cmd = tag_cmd
         new_tag_cmd.append("-i")
@@ -146,11 +159,11 @@ class MediaItemProcessor:
         for part_parser in self.part_parsers:
             if self.opts.removetags and self.canTag(part_parser):
                 skipped_all = False
-                remove_tags(part_parser)
+                self.remove_tags(part_parser)
             #end if removetags
             if self.opts.tag and self.canTag(part_parser) and self.shouldTag(part_parser):
                 skipped_all = False
-                tag(part_parser)
+                self.tag(part_parser)
             #end if tag   
             if self.opts.optimize and self.canTag(part_parser):
                 skipped_all = False

@@ -30,4 +30,15 @@ class SeasonMetadataParser(BaseMetadataParser):
     def name(self):
         return "%s - %s" % (self.show.name(), self.title)
     #end def name
+    
+    def tag_string(self):
+        tag_string = self.show.tag_string()
+        
+        #Example: "The X-Files, Season 1"
+        tag_string += self.new_tag_string_entry("Album", self.show.title+", "+self.title)
+        tag_string += self.new_tag_string_entry("Disk #", self.index)
+        tag_string += self.new_tag_string_entry("TV Season", self.index)
+        
+        return tag_string.strip()
+    #end def tag_string
 #end class SeasonMetadataParser
