@@ -61,8 +61,8 @@ class MovieMetadataParser(MediaItemMetadataParser):
     #end image_path
             
     
-    def tag_string(self):        
-        tag_string = super(MovieMetadataParser, self).tag_string()
+    def tag_string(self):
+        tag_string = ""
         
         if self.local_image_path == "":
             self.get_local_image_path()

@@ -18,7 +18,7 @@ class MediaMetadataParser(BaseMetadataParser):
         self.media_item = media_item
         self.media_node = media_node
         
-        resolution = self.media_node.attrib['videoResolution']
+        resolution = self.media_node.get('videoResolution', "")
         self.is_HD = resolution.isdigit() and int(resolution) >= 720
         
         part_node = self.media_node.find("Part")
