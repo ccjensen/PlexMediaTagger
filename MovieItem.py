@@ -10,15 +10,16 @@ from lxml import etree
 import logging
 import sys
 import os
-from MediaItemMetadataParser import *
+from VideoItem import *
 from PmsRequestHandler import *
+from MediaItem import *
 
-class MovieMetadataParser(MediaItemMetadataParser):
-    """docstring for MovieMetadataParser"""
+class MovieItem(VideoItem):
+    """docstring for MovieItem"""
     def __init__(self, opts, movie_metadata_container):
-        super(MovieMetadataParser, self).__init__(opts, movie_metadata_container)
+        super(MovieItem, self).__init__(opts, movie_metadata_container)
         media_node = self.video.find("Media")
-        self.media_parser = MediaMetadataParser(self.opts, self, media_node)
+        self.media_parser = MediaItem(self.opts, self, media_node)
         
         self.key = self.video.attrib['key']
         self.studio = self.video.get('studio', "")
@@ -82,4 +83,4 @@ class MovieMetadataParser(MediaItemMetadataParser):
         
         return tag_string.strip()
     #end def tag_string
-#end class MovieMetadataParser
+#end class MovieItem

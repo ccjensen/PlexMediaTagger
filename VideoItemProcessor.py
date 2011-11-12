@@ -6,18 +6,18 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
-from lxml import etree
+# from lxml import etree
 import logging
 import sys
 import os
 import subprocess
-from MovieMetadataParser import *
-from ShowMetadataParser import *
-from SeasonMetadataParser import *
-from EpisodeMetadataParser import *
+# from MovieItem import *
+# from ShowItem import *
+# from SeasonItem import *
+# from EpisodeItem import *
 
-class MediaItemProcessor:
-    """docstring for MediaItemProcessor"""
+class VideoItemProcessor:
+    """docstring for VideoItemProcessor"""
     def __init__(self, opts, media_item):
         self.opts = opts
         self.media_item = media_item
@@ -92,6 +92,21 @@ class MediaItemProcessor:
         #end if tagString in result
     #end getFileCommentTagContents
     
+    def execute_command(self, actionable_file_path, command, action_description):
+        logging.debug("'%s' arguments: %s" % (action_description, command))
+        if self.opts.dryrun:
+            result = "dryrun"
+        else:
+            #run command
+            result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+        #end
+        if "Error" in result:
+            logging.critical("Failed: %s" % result.strip())
+        else:
+            logging.warning("'%s': %s" % (action_description, actionable_file_path))
+        #end if "Error"
+    #end def execute_command
+    
     def remove_tags(self, part_parser):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         #removal of artwork doesn't seem to work
@@ -165,21 +180,6 @@ class MediaItemProcessor:
         
         self.execute_command(part_parser.file, optimize_cmd, action_description)
     #end remove_tags
-    
-    def execute_command(self, actionable_file_path, command, action_description):
-        logging.debug("'%s' arguments: %s" % (action_description, command))
-        if self.opts.dryrun:
-            result = "dryrun"
-        else:
-            #run command
-            result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-        #end
-        if "Error" in result:
-            logging.critical("Failed: %s" % result.strip())
-        else:
-            logging.warning("'%s': %s" % (action_description, actionable_file_path))
-        #end if "Error"
-    #end def execute_command
     
     
     def process(self):

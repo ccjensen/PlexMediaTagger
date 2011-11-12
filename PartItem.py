@@ -7,13 +7,13 @@
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
 from lxml import etree
-from BaseMetadataParser import *
-from StreamMetadataParser import *
+from BaseItem import *
+from StreamItem import *
 
-class PartMetadataParser(BaseMetadataParser):
-    """docstring for PartMetadataParser"""
+class PartItem(BaseItem):
+    """docstring for PartItem"""
     def __init__(self, opts, media_parser, node):
-        super(PartMetadataParser, self).__init__(opts)
+        super(PartItem, self).__init__(opts)
         self.opts = opts
         self.media_parser = media_parser
         self.part_node = node
@@ -27,7 +27,7 @@ class PartMetadataParser(BaseMetadataParser):
         stream_nodes = self.part_node.findall("Stream")
         self.stream_parsers = []
         for stream_node in stream_nodes:
-            stream_parser = StreamMetadataParser(self.opts, self, stream_node)
+            stream_parser = StreamItem(self.opts, self, stream_node)
             self.stream_parsers.append(stream_parser)
         #end for stream_nodes
     #end def __init__
@@ -37,4 +37,4 @@ class PartMetadataParser(BaseMetadataParser):
         return tag_string
     #end def tag_string
     
-#end class PartMetadataParser
+#end class PartItem

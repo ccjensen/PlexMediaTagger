@@ -11,12 +11,12 @@ import logging
 import sys
 import os
 from PmsRequestHandler import *
-from BaseMetadataParser import *
+from BaseItem import *
 
-class ShowMetadataParser(BaseMetadataParser):
-    """docstring for ShowMetadataParser"""
+class ShowItem(BaseItem):
+    """docstring for ShowItem"""
     def __init__(self, opts, show_container):
-        super(ShowMetadataParser, self).__init__(opts)
+        super(ShowItem, self).__init__(opts)
         
         self.key = show_container.attrib['key']
         self.studio = show_container.get('studio', "")
@@ -59,4 +59,4 @@ class ShowMetadataParser(BaseMetadataParser):
         
         return tag_string.strip()
     #end def tag_string
-#end class ShowMetadataParser
+#end class ShowItem

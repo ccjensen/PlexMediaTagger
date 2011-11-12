@@ -12,8 +12,8 @@ import sys
 import os
 from PmsRequestHandler import *
 
-class BaseMetadataParser(object):
-    """docstring for BaseMetadataParser"""
+class BaseItem(object):
+    """docstring for BaseItem"""
     def __init__(self, opts):
         self.opts = opts
     #end def __init__

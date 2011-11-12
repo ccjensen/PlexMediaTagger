@@ -9,11 +9,11 @@
 from lxml import etree
 import logging
 import sys
-from MovieMetadataParser import *
-from ShowMetadataParser import *
-from SeasonMetadataParser import *
-from EpisodeMetadataParser import *
-from MediaItemProcessor import *
+from MovieItem import *
+from ShowItem import *
+from SeasonItem import *
+from EpisodeItem import *
+from VideoItemProcessor import *
 
 class SectionProcessor:
     """docstring for SectionProcessor"""
@@ -37,16 +37,16 @@ class SectionProcessor:
         viewGroup = media_container.attrib['viewGroup']
         if viewGroup == 'movie':
             container_title = media_container.attrib['title1']
-            list_of_items = [MovieMetadataParser(self.opts, item) for item in media_container.getchildren()]
+            list_of_items = [MovieItem(self.opts, item) for item in media_container.getchildren()]
         elif viewGroup == 'show':
             container_title = media_container.attrib['title1']
-            list_of_items = [ShowMetadataParser(self.opts, item) for item in media_container.getchildren()]
+            list_of_items = [ShowItem(self.opts, item) for item in media_container.getchildren()]
         elif viewGroup == 'season':
             container_title = media_container.attrib['title2']
-            list_of_items = [SeasonMetadataParser(self.opts, item, context) for item in media_container.getchildren()]
+            list_of_items = [SeasonItem(self.opts, item, context) for item in media_container.getchildren()]
         elif viewGroup == 'episode':
             container_title = media_container.attrib['title2']
-            list_of_items = [EpisodeMetadataParser(self.opts, item, context) for item in media_container.getchildren()]
+            list_of_items = [EpisodeItem(self.opts, item, context) for item in media_container.getchildren()]
         #end if viewGroup
         
         list_of_items_mastered = []
@@ -123,11 +123,11 @@ class SectionProcessor:
         contents_type = movies_media_container.get('viewGroup', "")
         for index, partial_movie_metadata in enumerate(selected_movies):
             movie_metadata_container = self.request_handler.get_metadata_container_for_key(partial_movie_metadata.key)
-            movie = MovieMetadataParser(self.opts, movie_metadata_container)
+            movie = MovieItem(self.opts, movie_metadata_container)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_movies), contents_type, movie.name()) )
-            media_item_processor = MediaItemProcessor(self.opts, movie)
-            media_item_processor.process()
-        #end for videos_to_process
+            video_item_processor = VideoItemProcessor(self.opts, movie)
+            video_item_processor.process()
+        #end enumerate(selected_movies)
     #end process_movie_section
 
     def process_show_section(self, section):
@@ -141,7 +141,7 @@ class SectionProcessor:
         for index, show in enumerate(selected_shows):
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_shows), contents_type, show.name()) )
             self.process_season_section(show)
-        #end for show_to_process
+        #end enumerate(selected_shows)
     #end process_show_section
     
     def process_season_section(self, show):
@@ -155,7 +155,7 @@ class SectionProcessor:
         for index, season in enumerate(selected_seasons):
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_seasons), contents_type, season.name()) )
             self.process_episode_section(season)
-        #end for season_to_process
+        #end enumerate(selected_seasons)
     #end process_season_section
     
     def process_episode_section(self, season):
@@ -168,10 +168,10 @@ class SectionProcessor:
         contents_type = episodes_media_container.get('viewGroup', "")
         for index, partial_episode_metadata in enumerate(selected_episodes):
             episode_metadata_container = self.request_handler.get_metadata_container_for_key(partial_episode_metadata.key)
-            episode = EpisodeMetadataParser(self.opts, episode_metadata_container, season)
+            episode = EpisodeItem(self.opts, episode_metadata_container, season)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_episodes), contents_type, episode.name()) )
-            media_item_processor = MediaItemProcessor(self.opts, episode)
-            media_item_processor.process()
-        #end for season_to_process
-    #end process_season_section
+            video_item_processor = VideoItemProcessor(self.opts, episode)
+            video_item_processor.process()
+        #end enumerate(selected_episodes)
+    #end process_episode_section
 #end SectionProcessor

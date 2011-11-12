@@ -11,21 +11,21 @@ import logging
 import sys
 import os
 from PmsRequestHandler import *
-from BaseMetadataParser import *
-from MediaMetadataParser import *
+from BaseItem import *
 
-class MediaItemMetadataParser(BaseMetadataParser):
-    """docstring for MediaItemMetadataParser"""
-    def __init__(self, opts, item_metadata_container):
-        super(MediaItemMetadataParser, self).__init__(opts)
+class VideoItem(BaseItem):
+    """docstring for VideoItem"""
+    def __init__(self, opts, media_container_node):
+        super(VideoItem, self).__init__(opts)
         try:
-            media_container = item_metadata_container.getroot()
+            media_container = media_container_node.getroot()
         except AttributeError, e:
-            self.video = item_metadata_container
+            self.video = media_container_node
             return #this will happen if it's not a detailed metadata container
         else:
             videos = media_container.getchildren()
             if len(videos) != 1:
+                logging.critical("ERROR, MORE THAN ONE VIDEO TAG. ABORT")
                 return
             #end if len
             self.video = videos[0]

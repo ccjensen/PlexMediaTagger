@@ -11,12 +11,12 @@ import logging
 import sys
 import os
 from PmsRequestHandler import *
-from BaseMetadataParser import *
+from BaseItem import *
 
-class SeasonMetadataParser(BaseMetadataParser):
-    """docstring for SeasonMetadataParser"""
+class SeasonItem(BaseItem):
+    """docstring for SeasonItem"""
     def __init__(self, opts, season_container, show):
-        super(SeasonMetadataParser, self).__init__(opts)
+        super(SeasonItem, self).__init__(opts)
         self.show = show
         
         self.key = season_container.attrib['key']
@@ -41,4 +41,4 @@ class SeasonMetadataParser(BaseMetadataParser):
         
         return tag_string.strip()
     #end def tag_string
-#end class SeasonMetadataParser
+#end class SeasonItem

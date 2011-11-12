@@ -10,15 +10,16 @@ from lxml import etree
 import logging
 import sys
 import os
-from MediaItemMetadataParser import *
+from VideoItem import *
 from PmsRequestHandler import *
+from MediaItem import *
 
-class EpisodeMetadataParser(MediaItemMetadataParser):
-    """docstring for EpisodeMetadataParser"""
+class EpisodeItem(VideoItem):
+    """docstring for EpisodeItem"""
     def __init__(self, opts, episode_metadata_container, season):
-        super(EpisodeMetadataParser, self).__init__(opts, episode_metadata_container)
+        super(EpisodeItem, self).__init__(opts, episode_metadata_container)
         media_node = self.video.find("Media")
-        self.media_parser = MediaMetadataParser(self.opts, self, media_node)
+        self.media_parser = MediaItem(self.opts, self, media_node)
         
         self.season = season
         self.show = season.show
@@ -78,4 +79,4 @@ class EpisodeMetadataParser(MediaItemMetadataParser):
         
         return tag_string.strip()
     #end def tag_string
-#end class EpisodeMetadataParser
+#end class EpisodeItem

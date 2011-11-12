@@ -7,12 +7,12 @@
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
 from lxml import etree
-from BaseMetadataParser import *
+from BaseItem import *
 
-class StreamMetadataParser(BaseMetadataParser):
-    """docstring for StreamMetadataParser"""
+class StreamItem(BaseItem):
+    """docstring for StreamItem"""
     def __init__(self, opts, part_parser, node):
-        super(StreamMetadataParser, self).__init__(opts)
+        super(StreamItem, self).__init__(opts)
         self.opts = opts
         self.part_parser = part_parser
         self.stream_node = node
@@ -23,3 +23,4 @@ class StreamMetadataParser(BaseMetadataParser):
         self.language = self.stream_node.get('language', "")
         self.language_code = self.stream_node.get('languageCode', "")
     #end def __init__
+#end class StreamItem
