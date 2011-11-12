@@ -68,9 +68,6 @@ class MovieMetadataParser(MediaItemMetadataParser):
             self.get_local_image_path()
         tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
         tag_string += self.new_tag_string_entry("Media Kind", "Movie")
-        hd_value = "%d" % (1 if self.media_parser.is_HD else 0)
-        tag_string += self.new_tag_string_entry("HD Video", hd_value)
-        
         tag_string += self.new_tag_string_entry("Name", self.title)
         tag_string += self.new_tag_string_entry("Artist", self.directors)
         tag_string += self.new_tag_string_entry("Genre", self.genre) #single genre

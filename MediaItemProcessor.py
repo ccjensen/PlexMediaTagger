@@ -95,27 +95,26 @@ class MediaItemProcessor:
     def remove_tags(self, part_parser):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         #removal of artwork doesn't seem to work
-        all_tags = ["{Artwork:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}"]#, "{XID:}", "{iTunes Account:}", "{Sort Name:}", "{Sort Artist:}", "{Sort Album Artist:}", "{Sort Album:}", "{Sort Composer:}", "{Sort TV Show:}"]
+        all_tags = ["{Artwork:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}"]#these are currently not supported in subler cli tool, "{XID:}", "{iTunes Account:}", "{Sort Name:}", "{Sort Artist:}", "{Sort Album Artist:}", "{Sort Album:}", "{Sort Composer:}", "{Sort TV Show:}"]
         
         logging.warning("removing tags...")
         
         #Create the command line command
-        tag_cmd = ['%s' % SublerCLI]
-        tag_cmd.append("-t")
-        tag_cmd.append("".join(all_tags))
+        tag_removal_cmd = ['%s' % SublerCLI]
         
-        new_tag_cmd = tag_cmd
-        new_tag_cmd.append("-i")
-        new_tag_cmd.append(part_parser.file)
-        
-        logging.debug("remove tags command arguments: %s" % new_tag_cmd)
-        #run SublerCLI using the arguments we have created
-        result = ""#subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-        if "Error" in result:
-            logging.critical("Failed: %s" % result.strip())
+        if self.opts.optimize:
+            action_description = "Tags removed and optimized"
+            tag_removal_cmd.append("-O")
         else:
-            logging.warning("Tags removed from '%s'" % self.path)
-        #end if "Error"
+            action_description = "Tags removed"
+        #end if optimize
+        
+        tag_removal_cmd.append("-t")
+        tag_removal_cmd.append("".join(all_tags))
+        tag_removal_cmd.append("-i")
+        tag_removal_cmd.append(part_parser.file)
+        
+        self.execute_command(part_parser.file, tag_removal_cmd, action_description)
     #end remove_tags
     
     def create_new_comment_tag_contents(self, part_parser):
@@ -136,22 +135,52 @@ class MediaItemProcessor:
         
         #Create the command line command
         tag_cmd = ['%s' % SublerCLI]
+
+        if self.opts.optimize:
+            action_description = "Tags added and optimized"
+            tag_cmd.append("-O")
+        else:
+            action_description = "Tags added"
+        #end if optimize
+
         tag_cmd.append("-t")
         tag_cmd.append(part_parser.tag_string()) #also downloads the artwork
+        tag_cmd.append("-i")
+        tag_cmd.append(part_parser.file)
         
-        new_tag_cmd = tag_cmd
-        new_tag_cmd.append("-i")
-        new_tag_cmd.append(part_parser.file)
+        self.execute_command(part_parser.file, tag_cmd, action_description)
+    #end tag
+    
+    def optimize(self, part_parser):
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         
-        logging.debug("tag command arguments: %s" % new_tag_cmd)
-        #run SublerCLI using the arguments we have created
-        result = "mm"#subprocess.Popen(new_tag_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+        logging.warning("optimizing file...")
+        
+        action_description = "Tags optimized"
+        #Create the command line command
+        optimize_cmd = ['%s' % SublerCLI]
+        optimize_cmd.append("-O")
+        optimize_cmd.append("-i")
+        optimize_cmd.append(part_parser.file)
+        
+        self.execute_command(part_parser.file, optimize_cmd, action_description)
+    #end remove_tags
+    
+    def execute_command(self, actionable_file_path, command, action_description):
+        logging.debug("'%s' arguments: %s" % (action_description, command))
+        if self.opts.dryrun:
+            result = "dryrun"
+        else:
+            #run command
+            result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+        #end
         if "Error" in result:
             logging.critical("Failed: %s" % result.strip())
         else:
-            logging.warning("Tagged '%s'" % part_parser.file)
+            logging.warning("'%s': %s" % (action_description, actionable_file_path))
         #end if "Error"
-    #end tag
+    #end def execute_command
+    
     
     def process(self):
         skipped_all = True
@@ -165,11 +194,10 @@ class MediaItemProcessor:
                 skipped_all = False
                 self.tag(part_parser)
             #end if tag   
-            if self.opts.optimize and self.canTag(part_parser):
+            if self.opts.optimize and not self.opts.tag and not self.opts.removetags and self.canTag(part_parser):
+                #optimize is done together with tagging or removing, so only needs to be done here if it's the exclusive action
                 skipped_all = False
-                if self.opts.optimize:
-                    tag_cmd.append("-O")
-                #end if self.opts.optimize
+                self.optimize(part_parser)
             #end if optimize
         if skipped_all:
             logging.warning("skipping: no files to tag")

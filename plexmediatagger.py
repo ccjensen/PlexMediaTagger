@@ -52,7 +52,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "-r", "--remove-all-tags", action="store_true", dest="removetags",
                         help="Removes all compatible tags from the files. Files will have to be retagged.")
     parser.add_option(  "-f", "--force", action="store_true", dest="force",
-                        help="Ignores previous work and steams ahead with task (like tagging previously tagged files, etc.)")
+                        help="Ignores previous work and steams ahead with task (like tagging previously tagged files, etc.).")
     parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
                         help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the beginning of the file.")
                         
@@ -62,16 +62,18 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="Specifies an alternate port number to use when connecting to the PMS (default is 32400).")
     
     parser.add_option(  "-b", "--batch", action="store_false", dest="interactive",
-                        help="Disables interactive. Requires no human intervention once launched, and will perform operations on all files")
+                        help="Disables interactive. Requires no human intervention once launched, and will perform operations on all files.")
     parser.add_option(  "--interactive", action="store_true", dest="interactive",
-                        help="interactivly select files to operate on [default]")
+                        help="interactivly select files to operate on [default].")
 
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
-                        callback=setLogLevel, help='Increase verbosity')
+                        callback=setLogLevel, help='Increase verbosity (can be supplied 0-2 times).')
     parser.add_option(  "-q", "--quiet", action="store_true", dest="quiet",
-                        help="For ninja-like processing (Can only be used when in batch mode)")
+                        help="For ninja-like processing (Can only be used when in batch mode).")
+    parser.add_option(  "-d", "--dry-run", action="store_true", dest="dryrun",
+                        help="Pretends to do the job, but never actually changes or exports anything. Will pretend that all tasks would have succeeded. Useful for testing purposes.")
 
-    parser.set_defaults( tag=False, remove_tags=False, optimize=False, force_tagging=False, interactive=True, quiet=False,
+    parser.set_defaults( tag=False, remove_tags=False, optimize=False, force_tagging=False, interactive=True, quiet=False, dryrun=False,
                         ip="localhost", port=32400)
     
     opts, args = parser.parse_args()
@@ -85,7 +87,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     if opts.interactive and not root.isEnabledFor(logging.INFO):
         root.setLevel(logging.INFO)
     
-    if opts.removetags:
+    if opts.dryrun:
+        logging.critical( "WARNING, RUNNING IN 'DRY RUN MODE'. NO ACTION WILL BE PERFORMED" )
+    elif opts.removetags:
         logging.critical( "WARNING, TAGS WILL BE REMOVED PERMANENTLY" )
     
     logging.error( "============ Plex Media Tagger Started ============" )
