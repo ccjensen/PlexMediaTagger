@@ -17,8 +17,10 @@ The tool requires python (pre-installed on most versions of Mac OS X and linux).
 
 ## Usage: 
 
-    Usage: plexmediatagger.py [options] [alternate IP/Domain (default is localhost)] [port number (default is 32400)]
-    Example: plexmediatagger.py -of 192.168.0.2 55400
+		Usage: plexmediatagger.py [options]
+		Example 1: plexmediatagger.py --tag
+		Example 2: plexmediatagger.py -bq --tag --remove-all-tags --optimize -e subtitles -ip 192.168.0.2 --port 55400
+		Example 3: plexmediatagger.py --export-resources subtitles
 
 The tool uses the comment metadata field to store metadata that does not have its own tag, but is a value that iTunes stores in its internal database (such as rating and playcount). There is an iTunes script in the extra's folder that can load this information into iTunes. So after the tools has run and embedded the information, select the corresponding file in iTunes and run the script. This will load in that extra information that cannot be embedded.
 
