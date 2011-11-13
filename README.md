@@ -7,7 +7,9 @@ the [Subler team](http://code.google.com/p/subler/), their CLI tool takes care o
 the [AtomicParsley team](http://atomicparsley.sourceforge.net/), their CLI tool helps with the detection of previously tagged files.
 
 ## Installation:
-Retrieve the tool and its support files with:
+Download the project: [Zip of project](https://github.com/ccjensen/PlexMediaTagger/zipball/master)
+
+If you think you might want to tweak the code, clone the repository::
 
     git clone git://github.com/ccjensen/PlexMediaTagger.git
 

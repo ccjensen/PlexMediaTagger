@@ -6,7 +6,6 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
-from lxml import etree
 from BaseItem import *
 from PartItem import *
 

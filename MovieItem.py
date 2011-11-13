@@ -6,12 +6,7 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
-from lxml import etree
-import logging
-import sys
-import os
 from VideoItem import *
-from PmsRequestHandler import *
 from MediaItem import *
 
 class MovieItem(VideoItem):

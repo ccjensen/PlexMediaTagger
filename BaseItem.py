@@ -6,7 +6,7 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
-from lxml import etree
+from xml.etree import ElementTree
 import logging
 import sys
 import os

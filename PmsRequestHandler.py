@@ -6,7 +6,7 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
-from lxml import etree
+from xml.etree import ElementTree
 import logging
 import sys
 import os
@@ -29,7 +29,8 @@ class PmsRequestHandler(Singleton):
     def get_contents(self, url):
         contents = []
         try:
-            contents = etree.parse(url)
+            xml = urlopen(url)
+            contents = ElementTree.parse(xml)
         except IOError, e:
             logging.debug(e)
             logging.critical("Could not connect to server %s:%d" % (self.ip, self.port))

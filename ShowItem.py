@@ -6,11 +6,6 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
-from lxml import etree
-import logging
-import sys
-import os
-from PmsRequestHandler import *
 from BaseItem import *
 
 class ShowItem(BaseItem):

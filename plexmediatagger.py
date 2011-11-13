@@ -25,7 +25,7 @@ import unicodedata
 import signal
 import logging
 
-from lxml import etree
+from xml.etree import ElementTree
 from optparse import OptionParser
 from ColorizingStreamHandler import *
 from PmsRequestHandler import *
