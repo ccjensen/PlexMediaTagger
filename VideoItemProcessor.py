@@ -9,6 +9,7 @@
 import logging
 import sys
 import os
+import glob
 import subprocess
 from DataTokens import *
 
@@ -160,6 +161,58 @@ class VideoItemProcessor:
         self.execute_command(part_item.file, optimize_cmd, action_description)
     #end remove_tags
     
+    def export_resources(self, part_item):
+        directory = os.path.dirname(part_item.file)
+        filename = os.path.basename(part_item.file)
+        filename_without_extension = os.path.splitext(filename)[0]
+        
+        os.chdir(directory)
+        #=== subtitles ===
+        #build up language_code dict
+        if self.opts.export_subtitles:
+            logging.warning("exporting subtitles...")
+            subtitle_stream_type = "3"
+            all_non_embedded_subtitles = []
+            for stream_item in part_item.stream_items:
+                if stream_item.stream_type == subtitle_stream_type and stream_item.key != "":
+                    all_non_embedded_subtitles.append(stream_item)
+                #end if
+            #end for
+
+            categorized_subtitles = {}
+            for subtitle in all_non_embedded_subtitles:
+                key = (subtitle.language_code, subtitle.codec)
+                if categorized_subtitles.has_key(key):
+                    categorized_subtitles[key].append(subtitle)
+                else:
+                    categorized_subtitles[key] = [subtitle]
+                #end if has_key
+            #end for all_subtitles            
+            
+            for key, subtitles in categorized_subtitles.iteritems():
+                #key = (eng, srt), (eng, sub), (fre, srt), etc.
+                language_code = key[0]
+                codec = key[1]
+                #get all existing sub files
+                #example filename: Sopranos - S01E01 - The Pilot.eng.01.srt
+                glob_str = "%s.[0-9][0-9].%s.%s" % (filename_without_extension, language_code, codec)
+                if len(glob.glob(glob_str)) > 0:
+                    logging.warning("Subtitle file(s) with language code '%s' of type '%s' already exist. Skipping..." % (language_code, codec))
+                    continue
+                #end if
+                
+                #export subs
+                i = 1
+                for subtitle in subtitles:
+                    subtitle_filename = "%s.%02d.%s.%s" % (filename_without_extension, i, language_code, codec)
+                    subtitle_full_path = os.path.join(directory, subtitle_filename)
+                    subtitle.export_to_path(subtitle_full_path)
+                    i += 1
+            #end for
+            
+        #end if subtitles
+        
+    #end remove_tags
     
     def process(self):
         skipped_all = True
@@ -178,8 +231,12 @@ class VideoItemProcessor:
                 skipped_all = False
                 self.optimize(part_item)
             #end if optimize
+            if self.opts.export_resources:
+                skipped_all = False
+                self.export_resources(part_item)
+            #end if export_resouces
         if skipped_all:
-            logging.warning("skipping: no files to tag")
+            logging.warning("skipping: no valid files for specified tasks")
         #end if skipped_all
     #end def process_item
 #end MediaPartProcessor

@@ -83,6 +83,25 @@ class PmsRequestHandler(Singleton):
         except TypeError, e:
             logging.critical( e.args )
         #end try
-    #end def downloadImage
+    #end def download_image
+    
+    def download_stream(self, destination_path, partial_url):
+        full_stream_url = "%s%s" %(self.base_url(), partial_url)
+        try:
+            f = urlopen(full_stream_url)            
+            logging.debug( "saving stream to " + destination_path)
+            with open(destination_path, "wb") as local_file:
+                local_file.write(f.read())
+            #end with open
+            return destination_path
+        #handle errors
+        except HTTPError, e:
+            logging.critical( "HTTP Error:", e.code, url )
+        except URLError, e:
+            logging.critical( "URL Error:", e.reason, url )
+        except TypeError, e:
+            logging.critical( e.args )
+        #end try
+    #end def download_stream
     
 #end class PmsRequestHandler 

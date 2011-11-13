@@ -51,7 +51,7 @@ class EpisodeItem(VideoItem):
         request_handler = PmsRequestHandler()
         #partial_image_url = self.thumb #use the season thumb instead
         partial_image_url = self.season.thumb
-        logging.info("Downloading artwork...")
+        logging.info("Downloading artwork to temporary location...")
         self.local_image_path = request_handler.download_image(self.name(), partial_image_url)
     #end image_path
             

@@ -21,7 +21,6 @@ __version__ = "0.5"
 import sys
 import os
 import re
-import glob
 import unicodedata
 import signal
 import logging
@@ -43,42 +42,52 @@ def main():
     parser = OptionParser(usage="\
 %prog [options]\n\
 Example 1: %prog --tag\n\
-Example 2: %prog -bq --tag --remove-all-tags --optimize -ip 192.168.0.2 --port 55400\n\
+Example 2: %prog -bq --tag --remove-all-tags --optimize -e subtitles -ip 192.168.0.2 --port 55400\n\
+Example 3: %prog --export-resources subtitles\n\
 %prog -h for full list of options\n\n\
 Filepaths to media items in PMS need to be the same as on machine that is running this script.\
 ")
     parser.add_option(  "-t", "--tag", action="store_true", dest="tag",
-                        help="Will tag all compatible file types, and will update any previously tagged files (if metadata in plex has changed).")
-    parser.add_option(  "-r", "--remove-all-tags", action="store_true", dest="removetags",
-                        help="Removes all compatible tags from the files. Files will have to be retagged.")
+                        help="tag all compatible file types, and update any previously tagged files (if metadata in plex has changed)")
+    parser.add_option(  "-r", "--remove-tags", action="store_true", dest="removetags",
+                        help="remove all compatible tags from the files")
     parser.add_option(  "-f", "--force", action="store_true", dest="force",
-                        help="Ignores previous work and steams ahead with task (like tagging previously tagged files, etc.).")
+                        help="ignore previous work and steam ahead with task (will re-tag previously tagged files, etc.)")
     parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
-                        help="Interleaves the audio and video samples, and puts the \"MooV\" atom at the beginning of the file.")
+                        help="interleave the audio and video samples, and put the \"MooV\" atom at the beginning of the file")
+    parser.add_option(  "--subtitles", action="store_true", dest="export_subtitles",
+                        help="export any subtitles to the same path as the video file")
+    parser.add_option(  "--coverart", action="store_true", dest="export_coverart",
+                        help="export the coverart to the same path as the video file")
                         
-    parser.add_option(  "-i", "--ip", action="store", dest="ip", type='string',
-                        help="Specifies an alternate IP address that hosts a PMS that we wish to connect to (default is localhost).")
-    parser.add_option(  "-p", "--port", action="store", dest="port", type='int',
-                        help="Specifies an alternate port number to use when connecting to the PMS (default is 32400).")
+    parser.add_option(  "-i", "--ip", action="store", dest="ip", type="string",
+                        help="specify an alternate IP address that hosts a PMS to connect to (default is localhost)")
+    parser.add_option(  "-p", "--port", action="store", dest="port", type="int",
+                        help="specify an alternate port number to use when connecting to the PMS (default is 32400)")
     
     parser.add_option(  "-b", "--batch", action="store_false", dest="interactive",
-                        help="Disables interactive. Requires no human intervention once launched, and will perform operations on all files.")
+                        help="disable interactive mode. Requires no human intervention once launched, and will perform operations on all valid files")
     parser.add_option(  "--interactive", action="store_true", dest="interactive",
-                        help="interactivly select files to operate on [default].")
+                        help="interactivly select files to operate on [default]")
 
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
-                        callback=setLogLevel, help='Increase verbosity (can be supplied 0-2 times).')
+                        callback=setLogLevel, help='increase verbosity (can be supplied 0-2 times)')
     parser.add_option(  "-q", "--quiet", action="store_true", dest="quiet",
-                        help="For ninja-like processing (Can only be used when in batch mode).")
+                        help="ninja-like processing (can only be used when in batch mode)")
     parser.add_option(  "-d", "--dry-run", action="store_true", dest="dryrun",
-                        help="Pretends to do the job, but never actually changes or exports anything. Will pretend that all tasks would have succeeded. Useful for testing purposes.")
+                        help="pretend to do the job, but never actually change or export anything. Pretends that all tasks succeed. Useful for testing purposes")
 
-    parser.set_defaults( tag=False, remove_tags=False, optimize=False, force_tagging=False, interactive=True, quiet=False, dryrun=False,
+    parser.set_defaults( tag=False, remove_tags=False, optimize=False, 
+                        export_resources=False, export_subtitles=False, export_coverart=False,
+                        force_tagging=False, interactive=True, quiet=False, dryrun=False,
                         ip="localhost", port=32400)
     
     opts, args = parser.parse_args()
     
-    if not opts.tag and not opts.removetags and not opts.optimize:
+    if opts.export_subtitles or opts.export_coverart:
+        opts.export_resources = True
+    
+    if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources:
         parser.error("No task to perform. Our work here is done...")
     
     if opts.quiet:

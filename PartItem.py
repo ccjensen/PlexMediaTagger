@@ -25,6 +25,7 @@ class PartItem(BaseItem):
         self.size = self.part_element.attrib['size']
         
         stream_elements = self.part_element.findall("Stream")
+        
         self.stream_items = []
         for stream_element in stream_elements:
             stream_item = StreamItem(self.opts, self, stream_element)

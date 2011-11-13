@@ -17,10 +17,33 @@ class StreamItem(BaseItem):
         self.part_item = part_item
         self.stream_element = stream_element
         
-        self.stream_type = self.stream_element.get('streamType', "")
+        self.id = self.stream_element.get('id', "")
+        self.key = self.stream_element.get('key', "")
+        self.stream_type = self.stream_element.get('streamType', "")        
         self.codec = self.stream_element.get('codec', "")
         self.channels = self.stream_element.get('channels', "")
         self.language = self.stream_element.get('language', "")
         self.language_code = self.stream_element.get('languageCode', "")
+        
+        self.stream_type_name = "Unknown"
+        if self.stream_type == "1":
+            self.stream_type_name = "Video"
+        elif self.stream_type == "2":
+            self.stream_type_name = "Audio"
+        elif self.stream_type == "3":
+            self.stream_type_name = "Subtitle"
+        #end if
     #end def __init__
+    
+    def export_to_path(self, path):
+        if self.key == "":
+            logging.warning("Cannot download asset")
+            return None
+        #end if
+        
+        request_handler = PmsRequestHandler()
+        filename = os.path.basename(path)
+        logging.info("Downloading %s", filename)
+        return request_handler.download_stream(path, self.key)
+    #end def export_to_path
 #end class StreamItem
