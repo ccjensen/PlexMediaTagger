@@ -13,9 +13,7 @@ If you think you might want to tweak the code, clone the repository::
 
     git clone git://github.com/ccjensen/PlexMediaTagger.git
 
-The tool requires python (pre-installed on Lion) and a python module called lxml. lxml was successfully installed on my system using:
-    
-    sudo env ARCHFLAGS="-arch i386 -arch x86_64" easy_install --allow-hosts=lxml.de,*.python.org lxml
+The tool requires python (pre-installed on most versions of Mac OS X and linux).
 
 ## Usage: 
 
