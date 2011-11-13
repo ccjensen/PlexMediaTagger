@@ -49,23 +49,14 @@ class SectionProcessor:
             list_of_items = [EpisodeItem(self.opts, item, context) for item in media_container_element.getchildren()]
         #end if view_group
         
-        list_of_items_mastered = []
+        list_of_items_without_containers = []
         #filter the list
         for item in list_of_items:
-            #this try-except block handles the "all episodes" in the season container
-            try:
-                item.leaf_count
-            except AttributeError:
-                #just add it
-                list_of_items_mastered.append(item)
-            else:
-                #only interested in 1 leaf counted items
-                if int(item.leaf_count) == 1:
-                    list_of_items_mastered.append(item)
-                #end if
-            #end try
+            if item.title != "All episodes":
+                list_of_items_without_containers.append(item)
+            #end if
         #end for
-        list_of_items = list_of_items_mastered
+        list_of_items = list_of_items_without_containers
         
         if not self.opts.interactive:
             return list_of_items #all

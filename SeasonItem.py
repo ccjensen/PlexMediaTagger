@@ -19,7 +19,6 @@ class SeasonItem(BaseItem):
         self.title = season_media_container.get('title', "")
         self.index = season_media_container.get('index', "")
         self.thumb = season_media_container.get('thumb', "")
-        self.leaf_count = season_media_container.get('leafCount', "1")
     #end def __init__
     
     def name(self):
