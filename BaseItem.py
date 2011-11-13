@@ -18,13 +18,14 @@ class BaseItem(object):
         self.opts = opts
     #end def __init__
     
-    def array_of_attributes_with_key_from_child_nodes_with_name(self, node, node_name, key):
+    def array_of_attributes_with_key_from_child_elements_with_name(self, element, child_element_name, key):
         result = [""]
-        subnodes = node.findall(node_name)
-        if len(subnodes) > 0:
-            result = map(lambda n: n.attrib[key], subnodes)
-        return result
-    #end def array_of_attributes_with_key_from_child_nodes_with_name
+        child_elements = element.findall(child_element_name)
+        attributes = []
+        if len(child_elements) > 0:
+            attributes = map(lambda n: n.attrib[key], child_elements)
+        return attributes
+    #end def array_of_attributes_with_key_from_child_elements_with_name
     
     def new_tag_string_entry(self, key, value):
         try:
@@ -40,4 +41,4 @@ class BaseItem(object):
             return ""
         #end try
     #end def new_tag_string_entry
-#end class MetadataParser
+#end class BaseItem

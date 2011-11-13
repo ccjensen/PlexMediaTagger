@@ -12,18 +12,19 @@ import sys
 import os
 from PmsRequestHandler import *
 from BaseItem import *
+from DataTokens import *
 
 class VideoItem(BaseItem):
     """docstring for VideoItem"""
-    def __init__(self, opts, media_container_node):
+    def __init__(self, opts, media_container):
         super(VideoItem, self).__init__(opts)
         try:
-            media_container = media_container_node.getroot()
+            media_container_element = media_container.getroot()
         except AttributeError, e:
-            self.video = media_container_node
+            self.video = media_container
             return #this will happen if it's not a detailed metadata container
         else:
-            videos = media_container.getchildren()
+            videos = media_container_element.getchildren()
             if len(videos) != 1:
                 logging.critical("ERROR, MORE THAN ONE VIDEO TAG. ABORT")
                 return
@@ -35,15 +36,24 @@ class VideoItem(BaseItem):
         #end try
     #end def __init__
     
-    def array_of_attributes_with_key_from_child_nodes_with_name(self, node, node_name, key):
-        result = [""]
-        nodes = node.findall(node_name)
-        if len(nodes) > 0:
-            result = map(lambda n: n.attrib[key], nodes)
-        return result
-    #end def array_of_attributes_with_key_from_child_nodes_with_name
-    
     def name(self):
         return "Generic Name"
     #end def name
-#end class MetadataParser
+    
+    def create_new_comment_tag_contents(self):        
+        rating = int( float(self.rating) * 10 )
+        rating_str = "%s%i" % (DataTokens.itunes_rating_token, rating)
+        play_count_str = DataTokens.itunes_playcount_token + self.view_count
+        updated_at_str = DataTokens.updated_at_token + self.updated_at
+        
+        itunes = [DataTokens.itunes_tag_data_token, rating_str, play_count_str, updated_at_str]
+        itunes_str = DataTokens.tag_data_delimiter.join(itunes)
+        return itunes_str
+    #end create_new_comment_tag_contents
+    
+    def tag_string(self):
+        tag_string = ""
+        tag_string += self.new_tag_string_entry("Comments", self.create_new_comment_tag_contents())
+        return tag_string.strip()
+    #end def tag_string
+#end class VideoItem

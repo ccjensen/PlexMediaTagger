@@ -6,52 +6,42 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
-# from lxml import etree
 import logging
 import sys
 import os
 import subprocess
-# from MovieItem import *
-# from ShowItem import *
-# from SeasonItem import *
-# from EpisodeItem import *
+from DataTokens import *
 
 class VideoItemProcessor:
     """docstring for VideoItemProcessor"""
-    def __init__(self, opts, media_item):
+    def __init__(self, opts, video_item):
         self.opts = opts
-        self.media_item = media_item
-        self.media_parser = self.media_item.media_parser
-        self.part_parsers = [self.media_parser.part_parser]
-        
-        self.tag_data_delimiter = "::::"
-        self.itunes_tag_data_token = "I_T_U_N_E_S"
-        self.itunes_rating_token = "R_"
-        self.itunes_playcount_token = "PC_"
-        self.updated_at_token = "D_"
+        self.video_item = video_item
+        self.media_item = self.video_item.media_item
+        self.part_items = [self.media_item.part_item]
     #end def __init__
     
-    def canTag(self, part_parser):
-        if part_parser.file_type == '.m4v' or part_parser.file_type == '.mp4':
+    def canTag(self, part_item):
+        if part_item.file_type == '.m4v' or part_item.file_type == '.mp4':
             return True
         else:
-            logging.info("PlexMediaTagger cannot tag '%s' files" % part_parser.file_type)
+            logging.info("PlexMediaTagger cannot tag '%s' files" % part_item.file_type)
             return False
         #end if
     #end def canTag
     
-    def shouldTag(self, part_parser):
+    def shouldTag(self, part_item):
         if self.opts.force:
             return True
         
-        comment_tag_contents = self.getFileCommentTagContents(part_parser)
+        comment_tag_contents = self.getFileCommentTagContents(part_item)
         for word in comment_tag_contents.split(" "):
-            if word.startswith(self.itunes_tag_data_token):
+            if word.startswith(DataTokens.itunes_tag_data_token):
                 logging.info("File previously tagged")
-                for item in word.split(self.tag_data_delimiter):
-                    if item.startswith(self.updated_at_token):
-                        tag_data_updated_at = item.split(self.updated_at_token)[1]
-                        metadata_updated_at = self.media_item.updated_at
+                for item in word.split(DataTokens.tag_data_delimiter):
+                    if item.startswith(DataTokens.updated_at_token):
+                        tag_data_updated_at = item.split(DataTokens.updated_at_token)[1]
+                        metadata_updated_at = self.video_item.updated_at
                         if (metadata_updated_at > tag_data_updated_at):
                             logging.info("Metadata has changed since last time")
                             return True
@@ -64,14 +54,14 @@ class VideoItemProcessor:
         return True
     #end def shouldTag
     
-    def getFileCommentTagContents(self, part_parser):
+    def getFileCommentTagContents(self, part_item):
         """docstring for getFileCommentTagContents"""
         AtomicParsley = os.path.join(sys.path[0], "AtomicParsley32")
         comment_tag = "Atom \"©cmt\""
 
         #Create the command line string
         get_tags_cmd = ['%s' % AtomicParsley]
-        get_tags_cmd.append('%s' % part_parser.file)
+        get_tags_cmd.append('%s' % part_item.file)
         get_tags_cmd.append('-t')
         
         #check if file has already been tagged
@@ -107,7 +97,7 @@ class VideoItemProcessor:
         #end if "Error"
     #end def execute_command
     
-    def remove_tags(self, part_parser):
+    def remove_tags(self, part_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         #removal of artwork doesn't seem to work
         all_tags = ["{Artwork:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}"]#these are currently not supported in subler cli tool, "{XID:}", "{iTunes Account:}", "{Sort Name:}", "{Sort Artist:}", "{Sort Album Artist:}", "{Sort Album:}", "{Sort Composer:}", "{Sort TV Show:}"]
@@ -127,23 +117,12 @@ class VideoItemProcessor:
         tag_removal_cmd.append("-t")
         tag_removal_cmd.append("".join(all_tags))
         tag_removal_cmd.append("-i")
-        tag_removal_cmd.append(part_parser.file)
+        tag_removal_cmd.append(part_item.file)
         
-        self.execute_command(part_parser.file, tag_removal_cmd, action_description)
+        self.execute_command(part_item.file, tag_removal_cmd, action_description)
     #end remove_tags
     
-    def create_new_comment_tag_contents(self, part_parser):
-        media_parser = part_parser.media_parser
-        rating = int( float(media_parser.rating) * 10 )
-        rating_str = "%s%i" % (self.itunes_rating_token, rating)
-        play_count_str = self.itunes_playcount_token + media_parser.view_count
-        updated_at_str = self.updated_at_token + media_parser.updated_at
-        itunes = [self.itunes_tag_data_token, rating_str, play_count_str, updated_at_str]
-        itunes_str = self.tag_data_delimiter.join(itunes)
-        return itunes_str
-    #end create_new_comment_tag_contents
-    
-    def tag(self, part_parser):
+    def tag(self, part_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         
         logging.warning("tagging...")
@@ -159,14 +138,14 @@ class VideoItemProcessor:
         #end if optimize
 
         tag_cmd.append("-t")
-        tag_cmd.append(part_parser.tag_string()) #also downloads the artwork
+        tag_cmd.append(part_item.tag_string()) #also downloads the artwork
         tag_cmd.append("-i")
-        tag_cmd.append(part_parser.file)
+        tag_cmd.append(part_item.file)
         
-        self.execute_command(part_parser.file, tag_cmd, action_description)
+        self.execute_command(part_item.file, tag_cmd, action_description)
     #end tag
     
-    def optimize(self, part_parser):
+    def optimize(self, part_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         
         logging.warning("optimizing file...")
@@ -176,28 +155,28 @@ class VideoItemProcessor:
         optimize_cmd = ['%s' % SublerCLI]
         optimize_cmd.append("-O")
         optimize_cmd.append("-i")
-        optimize_cmd.append(part_parser.file)
+        optimize_cmd.append(part_item.file)
         
-        self.execute_command(part_parser.file, optimize_cmd, action_description)
+        self.execute_command(part_item.file, optimize_cmd, action_description)
     #end remove_tags
     
     
     def process(self):
         skipped_all = True
         
-        for part_parser in self.part_parsers:
-            if self.opts.removetags and self.canTag(part_parser):
+        for part_item in self.part_items:
+            if self.opts.removetags and self.canTag(part_item):
                 skipped_all = False
-                self.remove_tags(part_parser)
+                self.remove_tags(part_item)
             #end if removetags
-            if self.opts.tag and self.canTag(part_parser) and self.shouldTag(part_parser):
+            if self.opts.tag and self.canTag(part_item) and self.shouldTag(part_item):
                 skipped_all = False
-                self.tag(part_parser)
+                self.tag(part_item)
             #end if tag   
-            if self.opts.optimize and not self.opts.tag and not self.opts.removetags and self.canTag(part_parser):
+            if self.opts.optimize and not self.opts.tag and not self.opts.removetags and self.canTag(part_item):
                 #optimize is done together with tagging or removing, so only needs to be done here if it's the exclusive action
                 skipped_all = False
-                self.optimize(part_parser)
+                self.optimize(part_item)
             #end if optimize
         if skipped_all:
             logging.warning("skipping: no files to tag")

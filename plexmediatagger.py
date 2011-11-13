@@ -101,47 +101,47 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     section_processor = SectionProcessor(opts, request_handler)
     
     logging.error( "Connecting to PMS at %s:%d" % (opts.ip, opts.port) )
-    sections_container = request_handler.getSectionsContainer()
+    sections_container = request_handler.get_sections_container()
     media_container = sections_container.getroot()
     title = media_container.attrib['title1']
-    sections = media_container.getchildren()
+    section_elements = media_container.getchildren()
     
-    section_choice = '' #default is empty == all
+    section_element_choice = '' #default is empty == all
     if opts.interactive:
         logging.info( "List of sections for %s" % title )
-        for index, section in enumerate(sections):
-            logging.info( "%d. %s" %(index, section.attrib['title']) )
+        for index, section_element in enumerate(section_elements):
+            logging.info( "%d. %s" %(index, section_element.attrib['title']) )
         #end for
-        if len(sections) == 0:
+        if len(section_elements) == 0:
             logging.error( "No sections found" )
         else:    
             logging.warning( "empty input equals all" )
     
             #ask user what sections should be processed
-            section_choice = raw_input("Section to process $")
-            if section_choice != '':
+            section_element_choice = raw_input("Section to process $")
+            if section_element_choice != '':
                 try:
-                    section_choice = int(section_choice)
+                    section_element_choice = int(section_element_choice)
                 except ValueError, e:
                     logging.debug(e)
                     logging.critical( "'%s' is not a valid section number" % input )
                     sys.exit(1)
                 #end try
-            #end if section_choice
-        #end if len(sections)
+            #end if section_element_choice
+        #end if len(section_elements)
     #end if opts.interactive
     
-    if section_choice == '': #all
-        sections_to_process = sections
+    if section_element_choice == '': #all
+        section_elements_to_process = section_elements
     else:
-        sections_to_process = [sections[section_choice]]
+        section_elements_to_process = [section_elements[section_element_choice]]
     #end if
     
     logging.error( "Processing sections..." )
-    for index, section_to_process in enumerate(sections_to_process):
-        section_title = section_to_process.attrib['title']
-        logging.error( "Processing section %d/%d : '%s'..." % (index+1, len(sections_to_process), section_title) )
-        section_processor.process_section(section_to_process)
+    for index, section_element in enumerate(section_elements_to_process):
+        section_title = section_element.attrib['title']
+        logging.error( "Processing section %d/%d : '%s'..." % (index+1, len(section_element), section_title) )
+        section_processor.process_section(section_element)
         logging.warning( "Section '%s' processed" % section_title )
     #end for
     logging.error( "Processing sections completed" )

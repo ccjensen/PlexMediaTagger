@@ -26,7 +26,7 @@ class PmsRequestHandler(Singleton):
         return "http://%s:%s" % (self.ip, self.port)
     #end def base_url
     
-    def getContents(self, url):
+    def get_contents(self, url):
         contents = []
         try:
             contents = etree.parse(url)
@@ -38,19 +38,19 @@ class PmsRequestHandler(Singleton):
         return contents
     #end getSectionsList
     
-    def getSectionsContainer(self):
+    def get_sections_container(self):
         url = "%s/library/sections" % (self.base_url())
-        return self.getContents(url)
+        return self.get_contents(url)
     #end getSectionsContainer
     
     def get_section_all_container_for_key(self, section_key):
         url = "%s/library/sections/%s/all" % (self.base_url(), section_key)
-        return self.getContents(url)
+        return self.get_contents(url)
     #end getSection
     
     def get_metadata_container_for_key(self, partial_url):
         url = "%s%s" % (self.base_url(), partial_url)
-        return self.getContents(url)
+        return self.get_contents(url)
     #end getSection
     
     def download_image(self, item_name, partial_url):

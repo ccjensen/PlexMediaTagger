@@ -15,25 +15,25 @@ from BaseItem import *
 
 class ShowItem(BaseItem):
     """docstring for ShowItem"""
-    def __init__(self, opts, show_container):
+    def __init__(self, opts, show_media_container):
         super(ShowItem, self).__init__(opts)
         
-        self.key = show_container.attrib['key']
-        self.studio = show_container.get('studio', "")
-        self.type = show_container.get('type', "")
-        self.title = show_container.get('title', "")
-        self.content_rating = show_container.get('contentRating', "") #PG-13, etc.
-        self.summary = show_container.get('summary', "")
-        self.index = show_container.get('index', "")
-        self.rating = show_container.get('rating', "") #not used
-        self.year = show_container.get('year', "")
-        self.thumb = show_container.get('thumb', "")
-        self.art = show_container.get('art', "")
-        self.banner = show_container.get('banner', "")
-        self.theme = show_container.get('theme', "")
-        self.originally_available_at = show_container.get('originallyAvailableAt', "")
+        self.key = show_media_container.attrib['key']
+        self.studio = show_media_container.get('studio', "")
+        self.type = show_media_container.get('type', "")
+        self.title = show_media_container.get('title', "")
+        self.content_rating = show_media_container.get('contentRating', "") #PG-13, etc.
+        self.summary = show_media_container.get('summary', "")
+        self.index = show_media_container.get('index', "")
+        self.rating = show_media_container.get('rating', "")
+        self.year = show_media_container.get('year', "")
+        self.thumb = show_media_container.get('thumb', "")
+        self.art = show_media_container.get('art', "")
+        self.banner = show_media_container.get('banner', "")
+        self.theme = show_media_container.get('theme', "")
+        self.originally_available_at = show_media_container.get('originallyAvailableAt', "")
         
-        self.genre_names = self.array_of_attributes_with_key_from_child_nodes_with_name(show_container, "Genre", "tag")
+        self.genre_names = self.array_of_attributes_with_key_from_child_elements_with_name(show_media_container, "Genre", "tag")
         if len(self.genre_names) > 0: 
             self.genre = self.genre_names[0] 
         else: 

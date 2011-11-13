@@ -16,10 +16,10 @@ from MediaItem import *
 
 class MovieItem(VideoItem):
     """docstring for MovieItem"""
-    def __init__(self, opts, movie_metadata_container):
-        super(MovieItem, self).__init__(opts, movie_metadata_container)
-        media_node = self.video.find("Media")
-        self.media_parser = MediaItem(self.opts, self, media_node)
+    def __init__(self, opts, movie_media_container):
+        super(MovieItem, self).__init__(opts, movie_media_container)
+        media_element = self.video.find("Media")
+        self.media_item = MediaItem(self.opts, self, media_element)
         
         self.key = self.video.attrib['key']
         self.studio = self.video.get('studio', "")
@@ -33,20 +33,20 @@ class MovieItem(VideoItem):
         self.thumb = self.video.get('thumb', "")
         self.originally_available_at = self.video.get('originallyAvailableAt', "")
         
-        self.genre_names = self.array_of_attributes_with_key_from_child_nodes_with_name(self.video, "Genre", "tag")
+        self.genre_names = self.array_of_attributes_with_key_from_child_elements_with_name(self.video, "Genre", "tag")
         if len(self.genre_names) > 0: 
             self.genre = self.genre_names[0] 
         else: 
             self.genre = ''
         self.genres = ', '.join(self.genre_names)
         
-        self.writer_names = self.array_of_attributes_with_key_from_child_nodes_with_name(self.video, "Writer", "tag")
+        self.writer_names = self.array_of_attributes_with_key_from_child_elements_with_name(self.video, "Writer", "tag")
         self.writers = ', '.join(self.writer_names)
         
-        self.director_names = self.array_of_attributes_with_key_from_child_nodes_with_name(self.video, "Director", "tag")
+        self.director_names = self.array_of_attributes_with_key_from_child_elements_with_name(self.video, "Director", "tag")
         self.directors = ', '.join(self.director_names)
         
-        self.cast_names = self.array_of_attributes_with_key_from_child_nodes_with_name(self.video, "Role", "tag")
+        self.cast_names = self.array_of_attributes_with_key_from_child_elements_with_name(self.video, "Role", "tag")
         self.cast = ', '.join(self.cast_names)
     #end def __init__
     
@@ -62,11 +62,13 @@ class MovieItem(VideoItem):
     #end image_path
             
     
-    def tag_string(self):
-        tag_string = ""
-        
+    def tag_string(self):        
         if self.local_image_path == "":
             self.get_local_image_path()
+
+        tag_string = ""
+
+        tag_string += super(MovieItem, self).tag_string()
         tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
         tag_string += self.new_tag_string_entry("Media Kind", "Movie")
         tag_string += self.new_tag_string_entry("Name", self.title)

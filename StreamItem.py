@@ -11,16 +11,16 @@ from BaseItem import *
 
 class StreamItem(BaseItem):
     """docstring for StreamItem"""
-    def __init__(self, opts, part_parser, node):
+    def __init__(self, opts, part_item, stream_element):
         super(StreamItem, self).__init__(opts)
         self.opts = opts
-        self.part_parser = part_parser
-        self.stream_node = node
+        self.part_item = part_item
+        self.stream_element = stream_element
         
-        self.stream_type = self.stream_node.get('streamType', "")
-        self.codec = self.stream_node.get('codec', "")
-        self.channels = self.stream_node.get('channels', "")
-        self.language = self.stream_node.get('language', "")
-        self.language_code = self.stream_node.get('languageCode', "")
+        self.stream_type = self.stream_element.get('streamType', "")
+        self.codec = self.stream_element.get('codec', "")
+        self.channels = self.stream_element.get('channels', "")
+        self.language = self.stream_element.get('language', "")
+        self.language_code = self.stream_element.get('languageCode', "")
     #end def __init__
 #end class StreamItem

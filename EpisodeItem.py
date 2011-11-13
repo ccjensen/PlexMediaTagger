@@ -16,10 +16,10 @@ from MediaItem import *
 
 class EpisodeItem(VideoItem):
     """docstring for EpisodeItem"""
-    def __init__(self, opts, episode_metadata_container, season):
-        super(EpisodeItem, self).__init__(opts, episode_metadata_container)
-        media_node = self.video.find("Media")
-        self.media_parser = MediaItem(self.opts, self, media_node)
+    def __init__(self, opts, episode_media_container, season):
+        super(EpisodeItem, self).__init__(opts, episode_media_container)
+        media_element = self.video.find("Media")
+        self.media_item = MediaItem(self.opts, self, media_element)
         
         self.season = season
         self.show = season.show
@@ -34,10 +34,10 @@ class EpisodeItem(VideoItem):
         self.thumb = self.video.get('thumb', "")
         self.originally_available_at = self.video.get('originallyAvailableAt', "")
 
-        self.writer_names = self.array_of_attributes_with_key_from_child_nodes_with_name(self.video, "Writer", "tag")
+        self.writer_names = self.array_of_attributes_with_key_from_child_elements_with_name(self.video, "Writer", "tag")
         self.writers = ', '.join(self.writer_names)
 
-        self.director_names = self.array_of_attributes_with_key_from_child_nodes_with_name(self.video, "Director", "tag")
+        self.director_names = self.array_of_attributes_with_key_from_child_elements_with_name(self.video, "Director", "tag")
         self.directors = ', '.join(self.director_names)
         
         #other metadata can/will be retreived from the season object which holds a link to the show object
@@ -61,6 +61,7 @@ class EpisodeItem(VideoItem):
             self.get_local_image_path()
 
         tag_string = self.season.tag_string()
+        tag_string += super(EpisodeItem, self).tag_string()
         
         tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)        
         tag_string += self.new_tag_string_entry("Name", self.title)

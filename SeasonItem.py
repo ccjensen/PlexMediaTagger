@@ -15,16 +15,16 @@ from BaseItem import *
 
 class SeasonItem(BaseItem):
     """docstring for SeasonItem"""
-    def __init__(self, opts, season_container, show):
+    def __init__(self, opts, season_media_container, show):
         super(SeasonItem, self).__init__(opts)
         self.show = show
         
-        self.key = season_container.attrib['key']
-        self.type = season_container.get('type', "")
-        self.title = season_container.get('title', "")
-        self.index = season_container.get('index', "")
-        self.thumb = season_container.get('thumb', "")
-        self.leaf_count = season_container.get('leafCount', "1")
+        self.key = season_media_container.attrib['key']
+        self.type = season_media_container.get('type', "")
+        self.title = season_media_container.get('title', "")
+        self.index = season_media_container.get('index', "")
+        self.thumb = season_media_container.get('thumb', "")
+        self.leaf_count = season_media_container.get('leafCount', "1")
     #end def __init__
     
     def name(self):
