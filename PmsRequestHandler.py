@@ -27,6 +27,7 @@ class PmsRequestHandler(Singleton):
     #end def base_url
     
     def get_contents(self, url):
+        logging.debug("Get contents: %s" % url)
         contents = []
         try:
             xml = urlopen(url)

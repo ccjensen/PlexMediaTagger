@@ -44,10 +44,13 @@ class EpisodeItem(VideoItem):
     
     def get_local_image_path(self):
         request_handler = PmsRequestHandler()
-        #partial_image_url = self.thumb #use the season thumb instead
-        partial_image_url = self.season.thumb
-        logging.info("Downloading artwork to temporary location...")
-        self.local_image_path = request_handler.download_image(self.name(), partial_image_url)
+        partial_image_url = self.thumb
+        logging.info("Downloading artwork...")
+        if self.opts.dryrun:
+            self.local_image_path = "/tmp/%s" % self.name()
+        else:
+            self.local_image_path = request_handler.download_image(self.name(), partial_image_url)
+        #end if not dryrun
     #end image_path
             
     

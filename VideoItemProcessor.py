@@ -90,7 +90,7 @@ class VideoItemProcessor:
         else:
             #run command
             result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-        #end
+        #end if dryrun
         if "Error" in result:
             logging.critical("Failed: %s" % result.strip())
         else:

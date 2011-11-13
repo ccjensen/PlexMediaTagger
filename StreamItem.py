@@ -43,6 +43,8 @@ class StreamItem(BaseItem):
         request_handler = PmsRequestHandler()
         filename = os.path.basename(path)
         logging.info("Downloading %s", filename)
-        return request_handler.download_stream(path, self.key)
+        if not self.opts.dryrun:
+            request_handler.download_stream(path, self.key)
+        #end if not dryrun
     #end def export_to_path
 #end class StreamItem
