@@ -193,18 +193,21 @@ class VideoItemProcessor:
                 #key = (eng, srt), (eng, sub), (fre, srt), etc.
                 language_code = key[0]
                 codec = key[1]
-                #get all existing sub files
-                #example filename: Sopranos - S01E01 - The Pilot.eng.01.srt
-                glob_str = "%s.[0-9][0-9].%s.%s" % (filename_without_extension, language_code, codec)
+                #get all existing sub files. example filename: Sopranos - S01E01 - The Pilot*.eng.srt
+                glob_str = "%s*.%s.%s" % (filename_without_extension, language_code, codec)
                 if len(glob.glob(glob_str)) > 0:
                     logging.warning("Subtitle file(s) with language code '%s' of type '%s' already exist. Skipping..." % (language_code, codec))
                     continue
                 #end if
                 
                 #export subs
-                i = 1
+                i = 0
                 for subtitle in subtitles:
-                    subtitle_filename = "%s.%02d.%s.%s" % (filename_without_extension, i, language_code, codec)
+                    if i == 0:
+                        subtitle_filename = "%s.%s.%s" % (filename_without_extension, language_code, codec)
+                    else:
+                        subtitle_filename = "%s.%02d.%s.%s" % (filename_without_extension, i, language_code, codec)
+                    #end if
                     subtitle_full_path = os.path.join(directory, subtitle_filename)
                     subtitle.export_to_path(subtitle_full_path)
                     i += 1
