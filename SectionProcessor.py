@@ -9,10 +9,11 @@
 from xml.etree import ElementTree
 import logging
 import sys
-from MovieItem import *
-from ShowItem import *
-from SeasonItem import *
-from EpisodeItem import *
+
+from Items.MovieItem import MovieItem
+from Items.ShowItem import ShowItem
+from Items.SeasonItem import SeasonItem
+from Items.EpisodeItem import EpisodeItem
 from VideoItemProcessor import *
 
 class SectionProcessor:

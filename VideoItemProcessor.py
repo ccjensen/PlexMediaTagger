@@ -215,7 +215,7 @@ class VideoItemProcessor:
             
         #end if subtitles
         
-    #end remove_tags
+    #end export_resources
     
     def process(self):
         skipped_all = True
