@@ -49,21 +49,24 @@ class MovieItem(VideoItem):
         return "%s (%s)" % (self.title, self.year)
     #end def name
     
-    def get_local_image_path(self):
+    def export_image_to_temporary_location(self):
+        self.export_image(None)
+    #end image_path
+    
+    def export_image(self, desired_local_path):
         request_handler = PmsRequestHandler()
         partial_image_url = self.thumb
         logging.info("Downloading artwork...")
         if self.opts.dryrun:
             self.local_image_path = "/tmp/%s" % self.name()
         else:
-            self.local_image_path = request_handler.download_image(self.name(), partial_image_url)
+            self.local_image_path = request_handler.download_image(partial_image_url, self.name(), None)
         #end if not dryrun
-    #end image_path
-            
+    #end export_image
     
     def tag_string(self):        
         if self.local_image_path == "":
-            self.get_local_image_path()
+            self.export_image_to_temporary_location()
 
         tag_string = ""
 

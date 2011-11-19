@@ -55,23 +55,27 @@ class PmsRequestHandler(Singleton):
         return self.get_contents(url)
     #end getSection
     
-    def download_image(self, item_name, partial_url):
+    def download_image(self, partial_url, item_name, desired_item_path):
         full_image_url = "%s%s" %(self.base_url(), partial_url)
         escaped_image_url = quote_plus(full_image_url)
         transcoder_image_url = "%s/photo/:/transcode?width=%d&height=%d&url=%s" % (self.base_url(), 1980, 1080, escaped_image_url)
         try:
+            directory = desired_item_path
+            if not directory:
+                directory = tempfile.gettempdir()
+            #end if not directory
+            
             f = urlopen(transcoder_image_url)
-            temporary_directory = tempfile.gettempdir()
             content_type = f.info()['Content-Type']
             if content_type == 'image/jpeg':
-                image_path = os.path.join(temporary_directory, item_name+".jpg")
+                image_path = os.path.join(directory, item_name+".jpg")
             elif content_type == 'image/png':
-                image_path = os.path.join(temporary_directory, item_name+".jpg")
+                image_path = os.path.join(directory, item_name+".png")
             else:
                 raise TypeError("Failed to download image: Unknown image mimetype [%s]", content_type)
             #end if
             
-            logging.debug( "saving temporary artwork to " + image_path)
+            logging.debug( "saving artwork to " + image_path)
             with open(image_path, "wb") as local_file:
                 local_file.write(f.read())
             #end with open
