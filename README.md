@@ -1,19 +1,20 @@
 #  Plex Media Tagger
-Tested on Mac OS X 10.7 (Lion)
+Tested on Mac OS X 10.7 (Lion)  
 
-thanks goes to:
-the [Plex team](http://www.plexapp.com), their PMS takes care of all the hard work of gathering the metadata and providing an intuitive web API to browse the local library.
-the [Subler team](http://code.google.com/p/subler/), their CLI tool takes care of the actual embedding of the information.
-the [AtomicParsley team](http://atomicparsley.sourceforge.net/), their CLI tool helps with the detection of previously tagged files.
+thanks goes to:  
+the [Plex team](http://www.plexapp.com), their PMS takes care of all the hard work of gathering the metadata and providing an intuitive web API to browse the local library.  
+the [Subler team](http://code.google.com/p/subler/), their CLI tool takes care of the actual embedding of the information.  
+the [AtomicParsley team](http://atomicparsley.sourceforge.net/), their CLI tool helps with the detection of previously tagged files.  
 
 ## Installation:
-Download the project: [Zip of project](https://github.com/ccjensen/PlexMediaTagger/zipball/master)
+Either:  
 
-If you think you might want to tweak the code, clone the repository::
+ *  Download the project: [Zip of project](https://github.com/ccjensen/PlexMediaTagger/zipball/master)  
+ *  or, if you think you might want to tweak the code, clone the repository::  
 
-    git clone git://github.com/ccjensen/PlexMediaTagger.git
+    		git clone git://github.com/ccjensen/PlexMediaTagger.git
 
-The tool requires python (pre-installed on most versions of Mac OS X and linux).
+The tool requires python (pre-installed on most versions of Mac OS X and linux).  
 
 ## Usage: 
 
