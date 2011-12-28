@@ -28,35 +28,35 @@ Note: Filepaths to media items in PMS need to be the same as on machine that is 
 
 ### Options:
 Options:  
-  -h, --help            show this help message and exit  
-  -t, --tag             tag all compatible file types, and update any  
-                        previously tagged files (if metadata in plex has  
-                        changed)  
-  -r, --remove-tags     remove all compatible tags from the files  
-  -f, --force           ignore previous work and steam ahead with task (will  
-                        re-tag previously tagged files, etc.)  
-  -o, --optimize        interleave the audio and video samples, and put the  
-                        "MooV" atom at the beginning of the file  
-  --subtitles           export any subtitles to the same path as the video  
-                        file  
-  --coverart            export the coverart to the same path as the video file  
-  -m <find> <replace>   perform a find & replace operation on the pms' media  
-                        file paths (useful if you are running the script on a  
-                        different machine than the one who is hosting the pms,  
-                        i.e. the mount paths are different). Supply multiple  
-                        times to perform several different replacements  
-                        (operations are performed in order supplied).  
-  -i IP, --ip=IP        specify an alternate IP address that hosts a PMS to  
-                        connect to (default is localhost)  
-  -p PORT, --port=PORT  specify an alternate port number to use when  
-                        connecting to the PMS (default is 32400)  
-  -b, --batch           disable interactive mode. Requires no human  
-                        intervention once launched, and will perform  
-                        operations on all valid files  
-  --interactive         interactivly select files to operate on [default]  
-  -v, --verbose         increase verbosity (can be supplied 0-2 times)  
-  -q, --quiet           ninja-like processing (can only be used when in batch  
-                        mode)  
-  -d, --dry-run         pretend to do the job, but never actually change or  
-                        export anything. Pretends that all tasks succeed.  
-                        Useful for testing purposes  
+ `-h, --help`          show this help message and exit  
+ `-t, --tag`           tag all compatible file types, and update any  
+                       previously tagged files (if metadata in plex has  
+                       changed)  
+ `-r, --remove-tags`   remove all compatible tags from the files  
+ `-f, --force`         ignore previous work and steam ahead with task (will  
+                       re-tag previously tagged files, etc.)  
+ `-o, --optimize`      interleave the audio and video samples, and put the  
+                       "MooV" atom at the beginning of the file  
+ `--subtitles`         export any subtitles to the same path as the video  
+                       file  
+ `--coverart`          export the coverart to the same path as the video file  
+ `-m <find> <replace>` perform a find & replace operation on the pms' media  
+                       file paths (useful if you are running the script on a  
+                       different machine than the one who is hosting the pms,  
+                       i.e. the mount paths are different). Supply multiple  
+                       times to perform several different replacements  
+                       (operations are performed in order supplied).  
+ `-i IP, --ip=IP`      specify an alternate IP address that hosts a PMS to  
+                       connect to (default is localhost)  
+ `-p PORT, --port=PORT`specify an alternate port number to use when  
+                       connecting to the PMS (default is 32400)  
+ `-b, --batch`         disable interactive mode. Requires no human  
+                       intervention once launched, and will perform  
+                       operations on all valid files  
+ `--interactive`       interactivly select files to operate on [default]  
+ `-v, --verbose`       increase verbosity (can be supplied 0-2 times)  
+ `-q, --quiet`         ninja-like processing (can only be used when in batch  
+                       mode)  
+ `-d, --dry-run`       pretend to do the job, but never actually change or  
+                       export anything. Pretends that all tasks succeed.  
+                       Useful for testing purposes  
