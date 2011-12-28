@@ -17,8 +17,8 @@ class PartItem(BaseItem):
         self.media_item = media_item
         self.part_element = part_element
         
-        self.file = self.part_element.attrib['file']
-        self.file_type = os.path.splitext(self.file)[1]
+        self.file_path = self.part_element.attrib['file']
+        self.file_type = os.path.splitext(self.file_path)[1]
         
         self.duration = self.part_element.attrib['duration']
         self.size = self.part_element.attrib['size']
@@ -36,5 +36,18 @@ class PartItem(BaseItem):
         tag_string = self.media_item.tag_string()
         return tag_string
     #end def tag_string
+    
+    def modified_file_path(self):
+        new_file_path = self.file_path
+        #loops through all the find&replace operations passed in on the cli
+        logging.debug( "original path %s" % self.file_path)
+        for path_modification in self.opts.path_modifications:
+            find_string = path_modification[0]
+            replace_string = path_modification[1]
+            new_file_path = new_file_path.replace(find_string, replace_string)
+        #end for
+        logging.debug( "modified path %s" % new_file_path)
+        return new_file_path
+    #end def modified_file_path
     
 #end class PartItem

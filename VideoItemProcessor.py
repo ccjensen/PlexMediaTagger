@@ -62,7 +62,7 @@ class VideoItemProcessor:
 
         #Create the command line string
         get_tags_cmd = ['%s' % AtomicParsley]
-        get_tags_cmd.append('%s' % part_item.file)
+        get_tags_cmd.append('%s' % part_item.modified_file_path())
         get_tags_cmd.append('-t')
         
         #check if file has already been tagged
@@ -118,9 +118,9 @@ class VideoItemProcessor:
         tag_removal_cmd.append("-t")
         tag_removal_cmd.append("".join(all_tags))
         tag_removal_cmd.append("-i")
-        tag_removal_cmd.append(part_item.file)
+        tag_removal_cmd.append(part_item.modified_file_path())
         
-        self.execute_command(part_item.file, tag_removal_cmd, action_description)
+        self.execute_command(part_item.modified_file_path(), tag_removal_cmd, action_description)
     #end remove_tags
     
     def tag(self, part_item):
@@ -141,9 +141,9 @@ class VideoItemProcessor:
         tag_cmd.append("-t")
         tag_cmd.append(part_item.tag_string()) #also downloads the artwork
         tag_cmd.append("-i")
-        tag_cmd.append(part_item.file)
+        tag_cmd.append(part_item.modified_file_path())
         
-        self.execute_command(part_item.file, tag_cmd, action_description)
+        self.execute_command(part_item.modified_file_path(), tag_cmd, action_description)
     #end tag
     
     def optimize(self, part_item):
@@ -156,21 +156,22 @@ class VideoItemProcessor:
         optimize_cmd = ['%s' % SublerCLI]
         optimize_cmd.append("-O")
         optimize_cmd.append("-i")
-        optimize_cmd.append(part_item.file)
+        optimize_cmd.append(part_item.modified_file_path())
         
-        self.execute_command(part_item.file, optimize_cmd, action_description)
+        self.execute_command(part_item.modified_file_path(), optimize_cmd, action_description)
     #end remove_tags
     
     def export_resources(self, part_item):
-        directory = os.path.dirname(part_item.file)
-        filename = os.path.basename(part_item.file)
+        part_item_file_path = part_item.modified_file_path()
+        directory = os.path.dirname(part_item_file_path)
+        filename = os.path.basename(part_item_file_path)
         filename_without_extension = os.path.splitext(filename)[0]
         
         os.chdir(directory)
         #=== subtitles ===
         #build up language_code dict
         if self.opts.export_subtitles:
-            logging.warning("exporting subtitles...")
+            logging.warning("attempting to export subtitles...")
             subtitle_stream_type = "3"
             all_non_embedded_subtitles = []
             for stream_item in part_item.stream_items:
@@ -178,41 +179,50 @@ class VideoItemProcessor:
                     all_non_embedded_subtitles.append(stream_item)
                 #end if
             #end for
-
-            categorized_subtitles = {}
-            for subtitle in all_non_embedded_subtitles:
-                key = (subtitle.language_code, subtitle.codec)
-                if categorized_subtitles.has_key(key):
-                    categorized_subtitles[key].append(subtitle)
-                else:
-                    categorized_subtitles[key] = [subtitle]
-                #end if has_key
-            #end for all_subtitles            
-            
-            for key, subtitles in categorized_subtitles.iteritems():
-                #key = (eng, srt), (eng, sub), (fre, srt), etc.
-                language_code = key[0]
-                codec = key[1]
-                #get all existing sub files. example filename: Sopranos - S01E01 - The Pilot*.eng.srt
-                glob_str = "%s*.%s.%s" % (filename_without_extension, language_code, codec)
-                if len(glob.glob(glob_str)) > 0:
-                    logging.warning("Subtitle file(s) with language code '%s' of type '%s' already exist. Skipping..." % (language_code, codec))
-                    continue
-                #end if
+            number_of_non_embedded_subtitles = len(all_non_embedded_subtitles)
+            if number_of_non_embedded_subtitles == 0:
+                logging.warning("no subtitles found")
+            else:
+                logging.warning("found %d subtitle(s)" % number_of_non_embedded_subtitles)
                 
-                #export subs
-                i = 0
-                for subtitle in subtitles:
-                    if i == 0:
-                        subtitle_filename = "%s.%s.%s" % (filename_without_extension, language_code, codec)
+                categorized_subtitles = {}
+                for subtitle in all_non_embedded_subtitles:
+                    key = (subtitle.language_code, subtitle.codec)
+                    if categorized_subtitles.has_key(key):
+                        categorized_subtitles[key].append(subtitle)
                     else:
-                        subtitle_filename = "%s.%02d.%s.%s" % (filename_without_extension, i, language_code, codec)
+                        categorized_subtitles[key] = [subtitle]
+                    #end if has_key
+                #end for all_subtitles
+                
+                exported_subtitles = 0
+                for key, subtitles in categorized_subtitles.iteritems():
+                    #key = (eng, srt), (eng, sub), (fre, srt), etc.
+                    language_code = key[0]
+                    codec = key[1]
+                    #get all existing sub files. example filename: Sopranos - S01E01 - The Pilot*.eng.srt
+                    glob_str = "%s*.%s.%s" % (filename_without_extension, language_code, codec)
+                    if len(glob.glob(glob_str)) > 0:
+                        logging.warning("Subtitle file(s) with language code '%s' of type '%s' already exist. Skipping all matching..." % (language_code, codec))
+                        continue
                     #end if
-                    subtitle_full_path = os.path.join(directory, subtitle_filename)
-                    subtitle.export_to_path(subtitle_full_path)
-                    i += 1
-            #end for
-            
+                
+                    #export subs
+                    i = 0
+                    for subtitle in subtitles:
+                        if i == 0:
+                            subtitle_filename = "%s.%s.%s" % (filename_without_extension, language_code, codec)
+                        else:
+                            subtitle_filename = "%s.%02d.%s.%s" % (filename_without_extension, i, language_code, codec)
+                        #end if
+                        subtitle_full_path = os.path.join(directory, subtitle_filename)
+                        subtitle.export_to_path(subtitle_full_path)
+                        i += 1
+                        exported_subtitles += 1
+                    #end for subtitles
+                #end for categorized_subtitles
+                logging.warning( "exported %d subtitle(s), skipped %d" % ( exported_subtitles, (number_of_non_embedded_subtitles-exported_subtitles) ) )
+            #end if len(all_non_embedded_subtitles) == 0:
         #end if subtitles
         
     #end export_resources

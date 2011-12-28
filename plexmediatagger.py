@@ -43,9 +43,9 @@ def main():
 %prog [options]\n\
 Example 1: %prog --tag\n\
 Example 2: %prog -bq --tag --remove-all-tags --optimize -e subtitles -ip 192.168.0.2 --port 55400\n\
-Example 3: %prog --export-resources subtitles\n\
+Example 3: %prog --subtitles -m 'D:\Movies' '/Volumes/Media/Movies' -m '\\' '/'\n\
 %prog -h for full list of options\n\n\
-Filepaths to media items in PMS need to be the same as on machine that is running this script.\
+Filepaths to media items in PMS need to be the same as on machine that is running this script (can be worked around by using the -m option to modify the file path).\
 ")
     parser.add_option(  "-t", "--tag", action="store_true", dest="tag",
                         help="tag all compatible file types, and update any previously tagged files (if metadata in plex has changed)")
@@ -59,6 +59,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="export any subtitles to the same path as the video file")
     parser.add_option(  "--coverart", action="store_true", dest="export_coverart",
                         help="export the coverart to the same path as the video file")
+    parser.add_option(  "-m", action="append", type="string", dest="path_modifications", nargs=2, metavar="<find> <replace>",
+                        help="perform a find & replace operation on the pms' media file paths (useful if you are running the script on a different machine than the one who is hosting the pms, i.e. the mount paths are different). Supply multiple times to perform several different replacements (operations are performed in order supplied).")
                         
     parser.add_option(  "-i", "--ip", action="store", dest="ip", type="string",
                         help="specify an alternate IP address that hosts a PMS to connect to (default is localhost)")
@@ -80,10 +82,10 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.set_defaults( tag=False, remove_tags=False, optimize=False, 
                         export_resources=False, export_subtitles=False, export_coverart=False,
                         force_tagging=False, interactive=True, quiet=False, dryrun=False,
-                        ip="localhost", port=32400)
+                        ip="localhost", port=32400, path_modifications=[])
     
     opts, args = parser.parse_args()
-    
+
     if opts.export_subtitles or opts.export_coverart:
         opts.export_resources = True
     

@@ -36,13 +36,13 @@ class StreamItem(BaseItem):
     
     def export_to_path(self, path):
         if self.key == "":
-            logging.warning("Cannot download asset")
+            logging.warning("cannot download asset")
             return None
         #end if
         
         request_handler = PmsRequestHandler()
         filename = os.path.basename(path)
-        logging.info("Downloading %s", filename)
+        logging.info("downloading %s", filename)
         if not self.opts.dryrun:
             request_handler.download_stream(path, self.key)
         #end if not dryrun
