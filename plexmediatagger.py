@@ -30,7 +30,7 @@ from optparse import OptionParser
 from ColorizingStreamHandler import *
 from PmsRequestHandler import *
 from SectionProcessor import *
-
+from Statistics import *
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
@@ -57,8 +57,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="interleave the audio and video samples, and put the \"MooV\" atom at the beginning of the file")
     parser.add_option(  "--subtitles", action="store_true", dest="export_subtitles",
                         help="export any subtitles to the same path as the video file")
-    parser.add_option(  "--coverart", action="store_true", dest="export_coverart",
-                        help="export the coverart to the same path as the video file")
+    parser.add_option(  "--artwork", action="store_true", dest="export_artwork",
+                        help="export the artwork to the same path as the video file")
     parser.add_option(  "-m", action="append", type="string", dest="path_modifications", nargs=2, metavar="<find> <replace>",
                         help="perform a find & replace operation on the pms' media file paths (useful if you are running the script on a different machine than the one who is hosting the pms, i.e. the mount paths are different). Supply multiple times to perform several different replacements (operations are performed in order supplied).")
                         
@@ -80,7 +80,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="pretend to do the job, but never actually change or export anything. Pretends that all tasks succeed. Useful for testing purposes")
 
     parser.set_defaults( tag=False, remove_tags=False, optimize=False, 
-                        export_resources=False, export_subtitles=False, export_coverart=False,
+                        export_resources=False, export_subtitles=False, export_artwork=False,
                         force_tagging=False, interactive=True, quiet=False, dryrun=False,
                         ip="localhost", port=32400, path_modifications=[])
     
@@ -105,6 +105,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     logging.error( "============ Plex Media Tagger Started ============" )
     
+    statistics = Statistics()
     request_handler = PmsRequestHandler()
     request_handler.ip = opts.ip
     request_handler.port = opts.port
@@ -157,6 +158,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     #end for
     logging.error( "Processing sections completed" )
     logging.error( "============ Plex Media Tagger Completed ============" )
+    results = statistics.results()
+    for result in results:
+        logging.error(result)
 #end main
 
 

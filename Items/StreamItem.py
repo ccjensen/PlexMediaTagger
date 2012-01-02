@@ -44,7 +44,7 @@ class StreamItem(BaseItem):
         filename = os.path.basename(path)
         logging.info("downloading %s", filename)
         if not self.opts.dryrun:
-            request_handler.download_stream(path, self.key)
+            return request_handler.download_stream(path, self.key)
         #end if not dryrun
     #end def export_to_path
 #end class StreamItem

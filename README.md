@@ -40,7 +40,7 @@ Options:
                        "MooV" atom at the beginning of the file  
  `--subtitles`         export any subtitles to the same path as the video  
                        file  
- `--coverart`          export the coverart to the same path as the video file  
+ `--artwork`           export the artwork to the same path as the video file  
  `-m <find> <replace>` perform a find & replace operation on the pms' media  
                        file paths (useful if you are running the script on a  
                        different machine than the one who is hosting the pms,  

@@ -11,6 +11,7 @@ import sys
 import os
 import glob
 import subprocess
+from Statistics import *
 from DataTokens import *
 
 class VideoItemProcessor:
@@ -88,13 +89,22 @@ class VideoItemProcessor:
         if self.opts.dryrun:
             result = "dryrun"
         else:
-            #run command
-            result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+            #check if file exists
+            if os.path.isfile(actionable_file_path):
+                #run command
+                result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+            else:
+                result = "Error: Unable to find file."
+            #end if isfile
+                
         #end if dryrun
         if "Error" in result:
             logging.critical("Failed %s for %s: %s" % (action_description, actionable_file_path, result.strip()) )
+            return False
         else:
+            #success
             logging.warning("'%s': %s" % (action_description, actionable_file_path))
+            return True
         #end if "Error"
     #end def execute_command
     
@@ -121,7 +131,12 @@ class VideoItemProcessor:
         tag_removal_cmd.append("-i")
         tag_removal_cmd.append(filepath)
         
-        self.execute_command(filepath, tag_removal_cmd, action_description)
+        success = self.execute_command(filepath, tag_removal_cmd, action_description)
+        if success:
+            Statistics().metadata_removal_succeeded()
+        else:
+            Statistics().metadata_removal_failed()
+        #end success
     #end remove_tags
     
     def tag(self, part_item):
@@ -145,7 +160,12 @@ class VideoItemProcessor:
         tag_cmd.append("-i")
         tag_cmd.append(filepath)
         
-        self.execute_command(filepath, tag_cmd, action_description)
+        success = self.execute_command(filepath, tag_cmd, action_description)
+        if success:
+            Statistics().metadata_embedded_succeeded()
+        else:
+            Statistics().metadata_embedded_failed()
+        #end success
     #end tag
     
     def optimize(self, part_item):
@@ -161,7 +181,12 @@ class VideoItemProcessor:
         optimize_cmd.append("-i")
         optimize_cmd.append(filepath)
         
-        self.execute_command(filepath, optimize_cmd, action_description)
+        success = self.execute_command(filepath, optimize_cmd, action_description)
+        if success:
+            Statistics().metadata_optimized_succeeded()
+        else:
+            Statistics().metadata_optimized_failed()
+        #end success
     #end remove_tags
     
     def export_resources(self, part_item):
@@ -219,14 +244,23 @@ class VideoItemProcessor:
                             subtitle_filename = "%s.%02d.%s.%s" % (filename_without_extension, i, language_code, codec)
                         #end if
                         subtitle_full_path = os.path.join(directory, subtitle_filename)
-                        subtitle.export_to_path(subtitle_full_path)
-                        i += 1
-                        exported_subtitles += 1
+                        success = subtitle.export_to_path(subtitle_full_path)
+                        if success:
+                            i += 1
+                            exported_subtitles += 1
+                            Statistics().subtitle_export_succeeded()
+                        else:
+                            Statistics().subtitle_export_failed()
+                        #end success
                     #end for subtitles
                 #end for categorized_subtitles
                 logging.warning( "exported %d subtitle(s), skipped %d" % ( exported_subtitles, (number_of_non_embedded_subtitles-exported_subtitles) ) )
             #end if len(all_non_embedded_subtitles) == 0:
         #end if subtitles
+        
+        if self.opts.export_artwork:
+            logging.error("artwork export not yet implemented...")
+            #logging.warning("attempting to export artwork...")
         
     #end export_resources
     

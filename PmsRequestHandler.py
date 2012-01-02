@@ -103,10 +103,13 @@ class PmsRequestHandler(Singleton):
         #handle errors
         except HTTPError, e:
             logging.critical( "HTTP Error:", e.code, url )
+            return None
         except URLError, e:
             logging.critical( "URL Error:", e.reason, url )
+            return None
         except TypeError, e:
             logging.critical( e.args )
+            return None
         #end try
     #end def download_stream
     
