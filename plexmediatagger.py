@@ -86,7 +86,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     opts, args = parser.parse_args()
 
-    if opts.export_subtitles or opts.export_coverart:
+    if opts.export_subtitles or opts.export_artwork:
         opts.export_resources = True
     
     if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources:
