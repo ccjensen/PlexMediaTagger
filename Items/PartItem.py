@@ -8,6 +8,7 @@
 
 from BaseItem import *
 from StreamItem import *
+from urllib2 import unquote
 
 class PartItem(BaseItem):
     """docstring for PartItem"""
@@ -17,7 +18,8 @@ class PartItem(BaseItem):
         self.media_item = media_item
         self.part_element = part_element
         
-        self.file_path = self.part_element.attrib['file']
+        file_path = self.part_element.attrib['file']
+        self.file_path = unquote(file_path).decode('utf-8')
         self.file_type = os.path.splitext(self.file_path)[1]
         
         self.duration = self.part_element.attrib['duration']

@@ -92,7 +92,7 @@ class VideoItemProcessor:
             result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
         #end if dryrun
         if "Error" in result:
-            logging.critical("Failed: %s" % result.strip())
+            logging.critical("Failed %s for %s: %s" % (action_description, actionable_file_path, result.strip()) )
         else:
             logging.warning("'%s': %s" % (action_description, actionable_file_path))
         #end if "Error"
@@ -100,6 +100,7 @@ class VideoItemProcessor:
     
     def remove_tags(self, part_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
+        filepath = part_item.modified_file_path()
         #removal of artwork doesn't seem to work
         all_tags = ["{Artwork:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}"]#these are currently not supported in subler cli tool, "{XID:}", "{iTunes Account:}", "{Sort Name:}", "{Sort Artist:}", "{Sort Album Artist:}", "{Sort Album:}", "{Sort Composer:}", "{Sort TV Show:}"]
         
@@ -118,13 +119,14 @@ class VideoItemProcessor:
         tag_removal_cmd.append("-t")
         tag_removal_cmd.append("".join(all_tags))
         tag_removal_cmd.append("-i")
-        tag_removal_cmd.append(part_item.modified_file_path())
+        tag_removal_cmd.append(filepath)
         
-        self.execute_command(part_item.modified_file_path(), tag_removal_cmd, action_description)
+        self.execute_command(filepath, tag_removal_cmd, action_description)
     #end remove_tags
     
     def tag(self, part_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
+        filepath = part_item.modified_file_path()
         
         logging.warning("tagging...")
         
@@ -141,13 +143,14 @@ class VideoItemProcessor:
         tag_cmd.append("-t")
         tag_cmd.append(part_item.tag_string()) #also downloads the artwork
         tag_cmd.append("-i")
-        tag_cmd.append(part_item.modified_file_path())
+        tag_cmd.append(filepath)
         
-        self.execute_command(part_item.modified_file_path(), tag_cmd, action_description)
+        self.execute_command(filepath, tag_cmd, action_description)
     #end tag
     
     def optimize(self, part_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
+        filepath = part_item.modified_file_path()
         
         logging.warning("optimizing file...")
         
@@ -156,9 +159,9 @@ class VideoItemProcessor:
         optimize_cmd = ['%s' % SublerCLI]
         optimize_cmd.append("-O")
         optimize_cmd.append("-i")
-        optimize_cmd.append(part_item.modified_file_path())
+        optimize_cmd.append(filepath)
         
-        self.execute_command(part_item.modified_file_path(), optimize_cmd, action_description)
+        self.execute_command(filepath, optimize_cmd, action_description)
     #end remove_tags
     
     def export_resources(self, part_item):
