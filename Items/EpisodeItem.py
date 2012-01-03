@@ -26,7 +26,7 @@ class EpisodeItem(VideoItem):
         self.summary = self.video.get('summary', "")
         self.index = self.video.get('index', "")
         self.parent_index = self.video.get('parentIndex', "")
-        self.rating = self.video.get('rating', "")
+        self.rating = self.video.get('rating', "0")
         self.thumb = self.video.get('thumb', "")
         self.originally_available_at = self.video.get('originallyAvailableAt', "")
 

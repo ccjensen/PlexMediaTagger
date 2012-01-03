@@ -21,8 +21,7 @@ class PartItem(BaseItem):
         file_path = self.part_element.attrib['file']
         self.file_path = unquote(file_path).decode('utf-8')
         self.file_type = os.path.splitext(self.file_path)[1]
-        
-        self.duration = self.part_element.attrib['duration']
+        self.duration = self.part_element.get('duration', "")
         self.size = self.part_element.attrib['size']
         
         stream_elements = self.part_element.findall("Stream")

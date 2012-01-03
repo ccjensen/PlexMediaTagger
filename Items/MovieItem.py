@@ -23,7 +23,7 @@ class MovieItem(VideoItem):
         self.title = self.video.get('title', "")
         self.content_rating = self.video.get('contentRating', "") #PG-13, etc.
         self.summary = self.video.get('summary', "")
-        self.rating = self.video.get('rating', "")
+        self.rating = self.video.get('rating', "0")
         self.year = self.video.get('year', "")
         self.tagline = self.video.get('tagline', "")
         self.thumb = self.video.get('thumb', "")
