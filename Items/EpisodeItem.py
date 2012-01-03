@@ -6,6 +6,7 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
+import platform
 from VideoItem import *
 from MediaItem import *
 
@@ -42,6 +43,18 @@ class EpisodeItem(VideoItem):
         return "%s - S%02dE%02d - %s" % (self.season.show.name(), int(self.season.index), int(self.index), self.title)
     #end def name
     
+    def filesystem_compatible_name(self):
+        name = self.name()
+        illegal_characters = []
+        if platform.system() == 'Darwin':
+            illegal_characters.append("/")
+            illegal_characters.append(":")
+            
+        for illegal_character in illegal_characters:
+            name = name.replace(illegal_character, "_")
+        return name
+    #end def
+    
     def export_image_to_temporary_location(self):
         self.export_image(None)
     #end image_path
@@ -50,10 +63,12 @@ class EpisodeItem(VideoItem):
         request_handler = PmsRequestHandler()
         partial_image_url = self.thumb
         logging.info("Downloading artwork...")
+        
+        image_filename = self.filesystem_compatible_name()
         if self.opts.dryrun:
-            self.local_image_path = "/tmp/%s" % self.name()
+            self.local_image_path = "/tmp/%s" % image_filename
         else:
-            self.local_image_path = request_handler.download_image(partial_image_url, self.name(), None)
+            self.local_image_path = request_handler.download_image(partial_image_url, image_filename, None)
         #end if not dryrun
     #end export_image
             

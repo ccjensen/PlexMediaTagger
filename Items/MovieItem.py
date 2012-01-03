@@ -6,6 +6,7 @@
 #license:Creative Commons GNU GPL v2
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
+import platform
 from VideoItem import *
 from MediaItem import *
 
@@ -53,11 +54,24 @@ class MovieItem(VideoItem):
         self.export_image(None)
     #end image_path
     
+    def filesystem_compatible_name(self):
+        name = self.name()
+        illegal_characters = []
+        if platform.system() == 'Darwin':
+            illegal_characters.append("/")
+            illegal_characters.append(":")
+            
+        for illegal_character in illegal_characters:
+            name = name.replace(illegal_character, "_")
+        return name
+    #end def
+    
     def export_image(self, desired_local_path):
         request_handler = PmsRequestHandler()
         partial_image_url = self.thumb
         logging.info("Downloading artwork...")
-        image_filename = self.name().replace("/", "_")
+        
+        image_filename = self.filesystem_compatible_name()
         if self.opts.dryrun:
             self.local_image_path = "/tmp/%s" % image_filename
         else:
