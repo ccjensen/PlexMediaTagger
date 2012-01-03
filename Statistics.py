@@ -33,11 +33,11 @@ class Statistics:
         now_time = datetime.now()
         results = [] 
         
-        results.append("Metadata cleared: \t%d, Failed: %d, Total: %d" % ( self.metadata_removal_success, self.metadata_removal_fail, (self.metadata_removal_success+self.metadata_removal_fail) ))
-        results.append("Metadata embedded: \t%d, Failed: %d, Total: %d" % ( self.metadata_embedded_success, self.metadata_embedded_fail, (self.metadata_embedded_success+self.metadata_embedded_fail) ))
-        results.append("Metadata optimized: \t%d, Failed: %d, Total: %d" % ( self.metadata_optimized_success, self.metadata_optimized_fail, (self.metadata_optimized_success+self.metadata_optimized_fail) ))
-        results.append("Subtitles exported: \t%d, Failed: %d, Total: %d" % ( self.subtitle_export_success, self.subtitle_export_success, (self.subtitle_export_success+self.subtitle_export_success) ))
-        results.append("Artwork exported: \t%d, Failed: %d, Total: %d" % ( self.artwork_export_success, self.artwork_export_fail, (self.artwork_export_success+self.artwork_export_fail) ))
+        results.append("Metadata cleared: \t%d,  Failed: %d,  Total: %d" % ( self.metadata_removal_success, self.metadata_removal_fail, (self.metadata_removal_success+self.metadata_removal_fail) ))
+        results.append("Metadata embedded: \t%d,  Failed: %d,  Total: %d" % ( self.metadata_embedded_success, self.metadata_embedded_fail, (self.metadata_embedded_success+self.metadata_embedded_fail) ))
+        results.append("Metadata optimized: \t%d,  Failed: %d,  Total: %d" % ( self.metadata_optimized_success, self.metadata_optimized_fail, (self.metadata_optimized_success+self.metadata_optimized_fail) ))
+        results.append("Subtitles exported: \t%d,  Failed: %d,  Total: %d" % ( self.subtitle_export_success, self.subtitle_export_success, (self.subtitle_export_success+self.subtitle_export_success) ))
+        results.append("Artwork exported: \t%d,  Failed: %d,  Total: %d" % ( self.artwork_export_success, self.artwork_export_fail, (self.artwork_export_success+self.artwork_export_fail) ))
         
         duration = str(now_time - self.time_start).split('.')[0]
         results.append("Duration: %s" % duration)

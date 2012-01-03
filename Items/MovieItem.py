@@ -57,10 +57,11 @@ class MovieItem(VideoItem):
         request_handler = PmsRequestHandler()
         partial_image_url = self.thumb
         logging.info("Downloading artwork...")
+        image_filename = self.name().replace("/", "_")
         if self.opts.dryrun:
-            self.local_image_path = "/tmp/%s" % self.name()
+            self.local_image_path = "/tmp/%s" % image_filename
         else:
-            self.local_image_path = request_handler.download_image(partial_image_url, self.name(), None)
+            self.local_image_path = request_handler.download_image(partial_image_url, image_filename, None)
         #end if not dryrun
     #end export_image
     
