@@ -152,7 +152,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     logging.error( "Processing sections..." )
     for index, section_element in enumerate(section_elements_to_process):
         section_title = section_element.attrib['title']
-        logging.error( "Processing section %d/%d : '%s'..." % (index+1, len(section_element), section_title) )
+        logging.error( "Processing section %d/%d : '%s'..." % (index+1, len(section_elements_to_process), section_title) )
         section_processor.process_section(section_element)
         logging.warning( "Section '%s' processed" % section_title )
     #end for
