@@ -83,9 +83,9 @@ class PmsRequestHandler(Singleton):
             
         #handle errors
         except HTTPError, e:
-            logging.critical( "HTTP Error:", e.code, url )
+            logging.critical( "HTTP Error:", e.code, transcoder_image_url )
         except URLError, e:
-            logging.critical( "URL Error:", e.reason, url )
+            logging.critical( "URL Error:", e.reason, transcoder_image_url )
         except TypeError, e:
             logging.critical( e.args )
         #end try
@@ -102,10 +102,10 @@ class PmsRequestHandler(Singleton):
             return destination_path
         #handle errors
         except HTTPError, e:
-            logging.critical( "HTTP Error:", e.code, url )
+            logging.critical( "HTTP Error:", e.code, full_stream_url )
             return None
         except URLError, e:
-            logging.critical( "URL Error:", e.reason, url )
+            logging.critical( "URL Error:", e.reason, full_stream_url )
             return None
         except TypeError, e:
             logging.critical( e.args )
