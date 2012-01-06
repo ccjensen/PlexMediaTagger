@@ -44,7 +44,7 @@ class VideoItemProcessor:
                     if item.startswith(DataTokens.updated_at_token):
                         tag_data_updated_at = item.split(DataTokens.updated_at_token)[1]
                         metadata_updated_at = self.video_item.updated_at
-                        logging.debug("file:%s vs. pms:%s" % (tag_data_updated_at, metadata_updated_at)))
+                        logging.debug("file:%s vs. pms:%s" % (tag_data_updated_at, metadata_updated_at))
                         if (metadata_updated_at > tag_data_updated_at):
                             logging.info("Metadata has changed since last time")
                             return True
