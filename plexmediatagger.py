@@ -49,6 +49,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
 ")
     parser.add_option(  "-t", "--tag", action="store_true", dest="tag",
                         help="tag all compatible file types, and update any previously tagged files (if metadata in plex has changed)")
+    parser.add_option(  "--tag-tv-prefer-season-artwork", action="store_true", dest="tag_prefer_season_artwork",
+                        help="when tagging tv show episodes, the season artwork will be used instead of the episode thumbnail")
+    
     parser.add_option(  "-r", "--remove-tags", action="store_true", dest="removetags",
                         help="remove all compatible tags from the files")
     parser.add_option(  "-f", "--force", action="store_true", dest="force",
@@ -79,7 +82,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "-d", "--dry-run", action="store_true", dest="dryrun",
                         help="pretend to do the job, but never actually change or export anything. Pretends that all tasks succeed. Useful for testing purposes")
 
-    parser.set_defaults( tag=False, remove_tags=False, optimize=False, 
+    parser.set_defaults( tag=False, tag_prefer_season_artwork=False, remove_tags=False, optimize=False, 
                         export_resources=False, export_subtitles=False, export_artwork=False,
                         force_tagging=False, interactive=True, quiet=False, dryrun=False,
                         ip="localhost", port=32400, path_modifications=[])
@@ -91,6 +94,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources:
         parser.error("No task to perform. Our work here is done...")
+    
+    if opts.tag_prefer_season_artwork and not opts.tag:
+        parser.error("Cannot prefer season artwork when not tagging...")
     
     if opts.quiet:
         root.setLevel(logging.ERROR)

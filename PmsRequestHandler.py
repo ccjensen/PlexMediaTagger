@@ -11,6 +11,7 @@ import logging
 import sys
 import os
 import tempfile
+import platform
 from urllib2 import urlopen, URLError, HTTPError
 from urllib import quote_plus
 
@@ -112,5 +113,16 @@ class PmsRequestHandler(Singleton):
             return None
         #end try
     #end def download_stream
+    
+    def filesystem_compatible_name(self, name):
+        illegal_characters = []
+        if platform.system() == 'Darwin':
+            illegal_characters.append("/")
+            illegal_characters.append(":")
+            
+        for illegal_character in illegal_characters:
+            name = name.replace(illegal_character, "_")
+        return name
+    #end def
     
 #end class PmsRequestHandler 
