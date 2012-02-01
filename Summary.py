@@ -7,7 +7,6 @@
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
 from datetime import datetime
-import logging
 
 class Summary:
     __shared_state = {}
@@ -18,6 +17,7 @@ class Summary:
             self.time_start = datetime.now()
             self.datetimeformat = "%Y-%m-%d_%H:%M:%S"
             
+            self.items_processed = 0
             self.metadata_removal_success = 0
             self.metadata_removal_fail = 0
             self.metadata_embedded_success = 0
@@ -33,15 +33,34 @@ class Summary:
         now_time = datetime.now()
         results = [] 
         
-        results.append("Metadata cleared: \t%d, \tFailed: %d, \tTotal: %d" % ( self.metadata_removal_success, self.metadata_removal_fail, (self.metadata_removal_success+self.metadata_removal_fail) ))
-        results.append("Metadata embedded: \t%d, \tFailed: %d, \tTotal: %d" % ( self.metadata_embedded_success, self.metadata_embedded_fail, (self.metadata_embedded_success+self.metadata_embedded_fail) ))
-        results.append("Metadata optimized: \t%d, \tFailed: %d, \tTotal: %d" % ( self.metadata_optimized_success, self.metadata_optimized_fail, (self.metadata_optimized_success+self.metadata_optimized_fail) ))
-        results.append("Subtitles exported: \t%d, \tFailed: %d, \tTotal: %d" % ( self.subtitle_export_success, self.subtitle_export_success, (self.subtitle_export_success+self.subtitle_export_success) ))
-        results.append("Artwork exported: \t%d, \tFailed: %d, \tTotal: %d" % ( self.artwork_export_success, self.artwork_export_fail, (self.artwork_export_success+self.artwork_export_fail) ))
+        total_items = self.metadata_removal_success+self.metadata_removal_fail
+        if total_items > 0:
+            results.append("Metadata cleared: \t\t%d, \tFailed: %d, \tTotal: %d" % ( self.metadata_removal_success, self.metadata_removal_fail, total_items ))
         
+        total_items = self.metadata_embedded_success+self.metadata_embedded_fail
+        if total_items > 0:
+            results.append("Metadata embedded: \t\t%d, \tFailed: %d, \tTotal: %d" % ( self.metadata_embedded_success, self.metadata_embedded_fail, total_items ))
+        
+        total_items = self.metadata_optimized_success+self.metadata_optimized_fail
+        if total_items > 0:
+            results.append("Metadata optimized: \t\t%d, \tFailed: %d, \tTotal: %d" % ( self.metadata_optimized_success, self.metadata_optimized_fail, total_items ))
+        
+        total_items = self.subtitle_export_success+self.subtitle_export_success
+        if total_items > 0:
+            results.append("Subtitles exported: \t\t%d, \tFailed: %d, \tTotal: %d" % ( self.subtitle_export_success, self.subtitle_export_success, total_items ))
+        
+        total_items = self.artwork_export_success+self.artwork_export_fail
+        if total_items > 0:
+            results.append("Artwork exported: \t\t%d, \tFailed: %d, \tTotal: %d" % ( self.artwork_export_success, self.artwork_export_fail, total_items ))
+        
+        results.append("Items processed: \t\t%d" % ( self.items_processed ))
+            
         duration = str(now_time - self.time_start).split('.')[0]
-        results.append("Duration: %s" % duration)
+        results.append("Execution Duration: \t\t%s" % duration)
         return results
+    
+    def increment_items_processed(self):
+        self.items_processed += 1
     
     def metadata_removal_succeeded(self):
         self.metadata_removal_success += 1

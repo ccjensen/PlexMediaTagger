@@ -12,6 +12,7 @@ import os
 import glob
 import subprocess
 from Summary import *
+from LibraryStatistics import *
 from DataTokens import *
 
 class VideoItemProcessor:
@@ -268,7 +269,12 @@ class VideoItemProcessor:
     def process(self):
         skipped_all = True
         
+        if self.opts.gather_statistics:
+            skipped_all = False
+            LibraryStatistics().add_item(self.video_item)
+        
         for part_item in self.part_items:
+            Summary().increment_items_processed()
             if self.opts.removetags and self.canTag(part_item):
                 skipped_all = False
                 self.remove_tags(part_item)

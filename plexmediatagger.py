@@ -31,6 +31,7 @@ from ColorizingStreamHandler import *
 from PmsRequestHandler import *
 from SectionProcessor import *
 from Summary import *
+from LibraryStatistics import *
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
@@ -62,6 +63,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="export any subtitles to the same path as the video file")
     parser.add_option(  "--artwork", action="store_true", dest="export_artwork",
                         help="export the artwork to the same path as the video file")
+    parser.add_option(  "--stats", action="store_true", dest="gather_statistics",
+                        help="gather \"interesting\" statistics about the items being processed")
     parser.add_option(  "-m", action="append", type="string", dest="path_modifications", nargs=2, metavar="<find> <replace>",
                         help="perform a find & replace operation on the pms' media file paths (useful if you are running the script on a different machine than the one who is hosting the pms, i.e. the mount paths are different). Supply multiple times to perform several different replacements (operations are performed in order supplied).")
                         
@@ -83,7 +86,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="pretend to do the job, but never actually change or export anything. Pretends that all tasks succeed. Useful for testing purposes")
 
     parser.set_defaults( tag=False, tag_prefer_season_artwork=False, remove_tags=False, optimize=False, 
-                        export_resources=False, export_subtitles=False, export_artwork=False,
+                        export_resources=False, export_subtitles=False, export_artwork=False, gather_statistics=False,
                         force_tagging=False, interactive=True, quiet=False, dryrun=False,
                         ip="localhost", port=32400, path_modifications=[])
     
@@ -92,7 +95,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     if opts.export_subtitles or opts.export_artwork:
         opts.export_resources = True
     
-    if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources:
+    if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources and not opts.gather_statistics:
         parser.error("No task to perform. Our work here is done...")
     
     if opts.tag_prefer_season_artwork and not opts.tag:
@@ -105,12 +108,14 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         root.setLevel(logging.INFO)
     
     if opts.dryrun:
-        logging.critical( "WARNING, RUNNING IN 'DRY RUN MODE'. NO ACTION WILL BE PERFORMED" )
+        logging.critical( "WARNING, RUNNING IN 'DRY RUN MODE'. NO ACTUAL CHANGES WILL BE MADE" )
     elif opts.removetags:
         logging.critical( "WARNING, TAGS WILL BE REMOVED PERMANENTLY" )
     
     logging.error( "============ Plex Media Tagger Started ============" )
     
+    if opts.gather_statistics:
+        statistics = LibraryStatistics()
     summary = Summary()
     request_handler = PmsRequestHandler()
     request_handler.ip = opts.ip
@@ -163,8 +168,14 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         logging.warning( "Section '%s' processed" % section_title )
     #end for
     logging.error( "Processing sections completed" )
-    logging.error( "============ Plex Media Tagger Completed ============" )
+    logging.error( "=========== Plex Media Tagger Completed ===========" )
+    
     results = summary.results()
+    for result in results:
+        logging.error(result)
+    
+    logging.error( "============ Items Processed Statistics ===========" )
+    results = statistics.results()
     for result in results:
         logging.error(result)
 #end main
@@ -175,7 +186,7 @@ def setLogLevel(*args, **kwargs):
 
 
 def signal_handler(signal, frame):
-    logging.critical( "\r============ Terminating Plex Media Tagger ============" )
+    logging.critical( "\r========== Terminating Plex Media Tagger ==========" )
     sys.exit(0)
 #end signal_handler
 
