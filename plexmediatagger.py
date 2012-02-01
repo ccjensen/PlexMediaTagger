@@ -30,7 +30,7 @@ from optparse import OptionParser
 from ColorizingStreamHandler import *
 from PmsRequestHandler import *
 from SectionProcessor import *
-from Statistics import *
+from Summary import *
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
@@ -111,7 +111,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     logging.error( "============ Plex Media Tagger Started ============" )
     
-    statistics = Statistics()
+    summary = Summary()
     request_handler = PmsRequestHandler()
     request_handler.ip = opts.ip
     request_handler.port = opts.port
@@ -164,7 +164,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     #end for
     logging.error( "Processing sections completed" )
     logging.error( "============ Plex Media Tagger Completed ============" )
-    results = statistics.results()
+    results = summary.results()
     for result in results:
         logging.error(result)
 #end main

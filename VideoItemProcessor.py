@@ -11,7 +11,7 @@ import sys
 import os
 import glob
 import subprocess
-from Statistics import *
+from Summary import *
 from DataTokens import *
 
 class VideoItemProcessor:
@@ -134,9 +134,9 @@ class VideoItemProcessor:
         
         success = self.execute_command(filepath, tag_removal_cmd, action_description)
         if success:
-            Statistics().metadata_removal_succeeded()
+            Summary().metadata_removal_succeeded()
         else:
-            Statistics().metadata_removal_failed()
+            Summary().metadata_removal_failed()
         #end success
     #end remove_tags
     
@@ -163,9 +163,9 @@ class VideoItemProcessor:
         
         success = self.execute_command(filepath, tag_cmd, action_description)
         if success:
-            Statistics().metadata_embedded_succeeded()
+            Summary().metadata_embedded_succeeded()
         else:
-            Statistics().metadata_embedded_failed()
+            Summary().metadata_embedded_failed()
         #end success
     #end tag
     
@@ -184,9 +184,9 @@ class VideoItemProcessor:
         
         success = self.execute_command(filepath, optimize_cmd, action_description)
         if success:
-            Statistics().metadata_optimized_succeeded()
+            Summary().metadata_optimized_succeeded()
         else:
-            Statistics().metadata_optimized_failed()
+            Summary().metadata_optimized_failed()
         #end success
     #end remove_tags
     
@@ -249,9 +249,9 @@ class VideoItemProcessor:
                         if success:
                             i += 1
                             exported_subtitles += 1
-                            Statistics().subtitle_export_succeeded()
+                            Summary().subtitle_export_succeeded()
                         else:
-                            Statistics().subtitle_export_failed()
+                            Summary().subtitle_export_failed()
                         #end success
                     #end for subtitles
                 #end for categorized_subtitles
