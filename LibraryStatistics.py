@@ -54,10 +54,55 @@ class LibraryStatistics:
         return results
     #end def results
     
+    def time_labelled(self, number, non_pluralized_label):
+        label = non_pluralized_label
+        if number > 1:
+            label += "s"
+        return "%d %s" % (number, label)
+    #end def time_labelled
+    
     def time_formatted_string(self, duration):
+        time = []
         delta = timedelta(milliseconds=duration)
         d = datetime(1,1,1) + delta
-        return "%.02d:%02d:%02d:%02d" % (d.day-1, d.hour, d.minute, d.second)
+        years = d.year - 1
+        months = d.month - 1
+        days = d.day - 1
+        hours = d.hour
+        minutes = d.minute
+        seconds = d.second
+        
+        if years > 0:
+            time_str = self.time_labelled(years, "year")
+            if len(time_str) > 0:
+                time.append(time_str)
+        
+        if months > 0 or len(time) > 0:
+            time_str = self.time_labelled(months, "month")
+            if len(time_str) > 0:
+                time.append(time_str)
+        
+        if days > 0 or len(time) > 0:
+            time_str = self.time_labelled(days, "day")
+            if len(time_str) > 0:
+                time.append(time_str)
+        
+        if hours > 0 or len(time) > 0:
+            time_str = self.time_labelled(hours, "hour")
+            if len(time_str) > 0:
+                time.append(time_str)
+                
+        if minutes > 0 or len(time) > 0:
+            time_str = self.time_labelled(minutes, "minute")
+            if len(time_str) > 0:
+                time.append(time_str)
+                
+        if seconds > 0 or len(time) > 0:
+            time_str = self.time_labelled(seconds, "second")
+            if len(time_str) > 0:
+                time.append(time_str)
+        
+        return ", ".join(time)
     #end def time_formatted_string
     
     def average(self, amount, number_of_items):
@@ -81,6 +126,7 @@ class LibraryStatistics:
         for i, part_item in enumerate(part_items):
             duration = part_item.duration
             if duration == "":
+                print "ERROR: No duration!!! Let the developer know about this"
                 duration = 0
                 
             milliseconds = int(duration)
