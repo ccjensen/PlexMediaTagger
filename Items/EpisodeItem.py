@@ -23,7 +23,7 @@ class EpisodeItem(VideoItem):
         self.type = self.video.get('type', "")
         self.title = self.video.get('title', "")
         self.summary = self.video.get('summary', "")
-        self.index = self.video.get('index', "")
+        self.index = self.video.get('index', "0")
         self.parent_index = self.video.get('parentIndex', "")
         self.rating = self.video.get('rating', "0")
         self.thumb = self.video.get('thumb', "")
