@@ -21,6 +21,9 @@ class LibraryStatistics:
             
             self.number_of_episodes = 0
             self.number_of_movies = 0
+            
+            self.no_duration_key = "No Duration"
+            self.notes = {self.no_duration_key: []}
         #end def if not
     #end def init
 
@@ -51,34 +54,51 @@ class LibraryStatistics:
         average = self.average(self.total_duration_movies, self.number_of_movies)
         results.append("Average Movie Duration: \t%s" % ( self.time_formatted_string(average) ))
         
+        include_notes = False
+        for heading, strings in self.notes.items():
+            if len(strings) > 0:
+                include_notes = True
+                break
+            #end if
+        #end for
+        
+        if include_notes:
+            results.append(seperator)
+            results.append("NOTES:")
+            for heading, strings in self.notes.items():
+                results.append("  %s:" % heading)
+                for string in strings:
+                    results.append("\t%s" % string)
+                #end for
+            #end for
+        #end if
+        
         return results
     #end def results
     
     def time_labelled(self, number, non_pluralized_label):
         label = non_pluralized_label
-        if number > 1:
+        if number > 1 or number == 0:
             label += "s"
         return "%d %s" % (number, label)
     #end def time_labelled
     
     def time_formatted_string(self, duration):
         time = []
-        delta = timedelta(milliseconds=duration)
-        d = datetime(1,1,1) + delta
-        years = d.year - 1
-        months = d.month - 1
-        days = d.day - 1
-        hours = d.hour
-        minutes = d.minute
-        seconds = d.second
+        tdelta = timedelta(seconds=duration)
+        
+        years, days = divmod(tdelta.days, 365)
+        weeks, days = divmod(days, 7)
+        hours, rem = divmod(tdelta.seconds, 3600)
+        minutes, seconds = divmod(rem, 60)
         
         if years > 0:
             time_str = self.time_labelled(years, "year")
             if len(time_str) > 0:
                 time.append(time_str)
-        
-        if months > 0 or len(time) > 0:
-            time_str = self.time_labelled(months, "month")
+                
+        if weeks > 0:
+            time_str = self.time_labelled(weeks, "week")
             if len(time_str) > 0:
                 time.append(time_str)
         
@@ -126,14 +146,14 @@ class LibraryStatistics:
         for i, part_item in enumerate(part_items):
             duration = part_item.duration
             if duration == "":
-                print "ERROR: No duration!!! Let the developer know about this"
+                self.notes[self.no_duration_key].append(video_item.name())
                 duration = 0
                 
-            milliseconds = int(duration)
+            seconds = int(duration)/1000
             if video_item_class == EpisodeItem:
-                self.total_duration_episodes += milliseconds
+                self.total_duration_episodes += seconds
             elif video_item_class == MovieItem:
-                self.total_duration_movies += milliseconds
+                self.total_duration_movies += seconds
             #end if
         #end for
     #end def add_item
