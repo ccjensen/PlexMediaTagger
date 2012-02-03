@@ -86,6 +86,9 @@ class VideoItemProcessor:
         #end if tagString in result
     #end getFileCommentTagContents
     
+    def preexec(self): # Don't forward signals.
+        os.setpgrp()
+    
     def execute_command(self, actionable_file_path, command, action_description):
         logging.debug("'%s' arguments: %s" % (action_description, command))
         if self.opts.dryrun:
@@ -94,11 +97,11 @@ class VideoItemProcessor:
             #check if file exists
             if os.path.isfile(actionable_file_path):
                 #run command
-                result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+                result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0]
             else:
                 result = "Error: Unable to find file."
             #end if isfile
-                
+        
         #end if dryrun
         if "Error" in result:
             logging.critical("Failed %s for %s: %s" % (action_description, actionable_file_path, result.strip()) )

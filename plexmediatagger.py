@@ -33,6 +33,9 @@ from SectionProcessor import *
 from Summary import *
 from LibraryStatistics import *
 
+#global
+section_processor = None
+
 def main():
     signal.signal(signal.SIGINT, signal_handler)
     
@@ -121,6 +124,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     request_handler.ip = opts.ip
     request_handler.port = opts.port
     
+    global section_processor
     section_processor = SectionProcessor(opts, request_handler)
     
     logging.error( "Connecting to PMS at %s:%d" % (opts.ip, opts.port) )
@@ -165,19 +169,22 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         section_title = section_element.attrib['title']
         logging.error( "Processing section %d/%d : '%s'..." % (index+1, len(section_elements_to_process), section_title) )
         section_processor.process_section(section_element)
+        if section_processor.abort:
+            break
         logging.warning( "Section '%s' processed" % section_title )
     #end for
-    logging.error( "Processing sections completed" )
-    logging.error( "=========== Plex Media Tagger Completed ===========" )
+    if not section_processor.abort:
+        logging.error( "Processing sections completed" )
+        logging.error( "=========== Plex Media Tagger Completed ===========" )
+        results = summary.results()
+        for result in results:
+            logging.error(result)
     
-    results = summary.results()
-    for result in results:
-        logging.error(result)
-    
-    logging.error( "============ Items Processed Statistics ===========" )
-    results = statistics.results()
-    for result in results:
-        logging.error(result)
+    if opts.gather_statistics:
+        logging.error( "============ Items Processed Statistics ===========" )
+        results = statistics.results()
+        for result in results:
+            logging.error(result)
 #end main
 
 
@@ -186,10 +193,19 @@ def setLogLevel(*args, **kwargs):
 
 
 def signal_handler(signal, frame):
-    logging.critical( "\r========== Terminating Plex Media Tagger ==========" )
-    sys.exit(0)
+    section_processor.abort = True
+    logging.critical( "\rPerforming safe abort..." )
 #end signal_handler
 
+def abort():
+    logging.critical( "\r========== Terminating Plex Media Tagger ==========" )
+    sys.exit(0)
+#end def
+
 if __name__ == '__main__':
+    try:
         sys.exit(main())
+    except:
+        abort()
+    #end try
 #end if __name__
