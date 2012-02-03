@@ -17,7 +17,7 @@ class SeasonItem(BaseItem):
         self.key = season_media_container.attrib['key']
         self.type = season_media_container.get('type', "")
         self.title = season_media_container.get('title', "")
-        self.index = season_media_container.get('index', "0")
+        self.index = season_media_container.get('index', "")
         self.thumb = season_media_container.get('thumb', "")
         self.local_image_path = ""
     #end def __init__
