@@ -202,7 +202,8 @@ def signal_handler(signal, frame):
 
 def abort():
     logging.critical( "\r========== Terminating Plex Media Tagger ==========" )
-    section_processor.event.wait()
+    if section_processor:
+        section_processor.event.wait()
     sys.exit(0)
 #end def
 
