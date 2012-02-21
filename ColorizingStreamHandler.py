@@ -63,7 +63,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         try:
             import ctypes
             #call this here to cause an exception to be thrown if ctypes doesn't exist
-            ctypes.windll.kernel32.GetStdHandle(-10 - fd)
+            ctypes.windll.kernel32.GetStdHandle(-10)
             import re
             ansi_esc = re.compile(r'\x1b\[((?:\d+)(?:;(?:\d+))*)m')
             
@@ -79,6 +79,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
             }
             
             def output_colorized(self, message):
+                import ctypes
                 parts = self.ansi_esc.split(message)
                 write = self.stream.write
                 h = None
@@ -115,7 +116,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
                 message = message.replace('\x1b[33m', '')
                 message = message.replace('\x1b[36m', '')
                 message = message.replace('\x1b[0m', '')
-                self.stream.write(message.encode('utf-8'))
+                self.stream.write('test'+message.encode('utf-8'))
 
     def colorize(self, message, record):
         if record.levelno in self.level_map:
