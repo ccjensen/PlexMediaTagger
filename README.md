@@ -14,7 +14,9 @@ Either:
 
     		git clone git://github.com/ccjensen/PlexMediaTagger.git
 
-The tool requires python (pre-installed on most versions of Mac OS X and linux).  
+The tool requires python (pre-installed on most versions of Mac OS X and linux). I have tested it with [Python v2.7.2 for windows](http://python.org/getit/releases/2.7.2/). If you want pretty colors for the output, you might also have to download and install the [ctypes module](http://python.net/crew/theller/ctypes/) for python (it says it's included, but didn't seem to be with v2.7.2).
+
+Note: Embedding metadata in files only works on OS X, as it uses a tool that unforuntately only is available for that system. Exporting of resources (subtitles, artwork, etc) and statistics gathering should work fine on both unix and windows.
 
 ## Usage: 
 
@@ -33,6 +35,9 @@ Options:
  `-t, --tag`           tag all compatible file types, and update any  
                        previously tagged files (if metadata in plex has  
                        changed)  
+  `--tag-tv-prefer-season-artwork`
+                       when tagging tv show episodes, the season artwork will  
+                       be used instead of the episode thumbnail  
  `-r, --remove-tags`   remove all compatible tags from the files  
  `-f, --force`         ignore previous work and steam ahead with task (will  
                        re-tag previously tagged files, etc.)  
@@ -41,6 +46,8 @@ Options:
  `--subtitles`         export any subtitles to the same path as the video  
                        file  
  `--artwork`           export the artwork to the same path as the video file  
+  `--stats`            gather "interesting" statistics about the items being  
+                       processed  
  `-m <find> <replace>` perform a find & replace operation on the pms' media  
                        file paths (useful if you are running the script on a  
                        different machine than the one who is hosting the pms,  
