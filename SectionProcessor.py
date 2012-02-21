@@ -7,8 +7,10 @@
 # (http://creativecommons.org/licenses/GPL/2.0/)
 
 from xml.etree import ElementTree
+import threading
 import logging
 import sys
+import time
 
 from Items.MovieItem import MovieItem
 from Items.ShowItem import ShowItem
@@ -21,7 +23,8 @@ class SectionProcessor:
     def __init__(self, opts, request_handler):
         self.opts = opts
         self.request_handler = request_handler
-        self.abort = False
+        self.event = threading.Event()
+        self.event.set()
     #end def __init__
     
     def process_section(self, section_element):
@@ -119,8 +122,9 @@ class SectionProcessor:
             partial_movie_media_container = self.request_handler.get_metadata_container_for_key(partial_movie_item.key)
             full_movie_item = MovieItem(self.opts, partial_movie_media_container)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_movie_items), contents_type, full_movie_item.name()) )
-            video_item_processor = VideoItemProcessor(self.opts, full_movie_item)
-            video_item_processor.process()
+            threading.Thread(None, self.process_video(full_movie_item)).start()
+            time.sleep(1)
+            self.event.wait()
         #end enumerate(selected_movies)
     #end process_movie_section
 
@@ -166,8 +170,16 @@ class SectionProcessor:
             partial_episode_media_container = self.request_handler.get_metadata_container_for_key(partial_episode_item.key)
             full_episode_item = EpisodeItem(self.opts, partial_episode_media_container, season)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_episode_items), contents_type, full_episode_item.name()) )
-            video_item_processor = VideoItemProcessor(self.opts, full_episode_item)
-            video_item_processor.process()
+            threading.Thread(None, self.process_video(full_episode_item)).start()
+            time.sleep(1)
+            self.event.wait()
         #end enumerate(selected_episodes)
     #end process_episode_section
+    
+    def process_video(self, video_item):
+        self.event.clear()
+        video_item_processor = VideoItemProcessor(self.opts, video_item)
+        video_item_processor.process()
+        self.event.set()
+        time.sleep(3)
 #end SectionProcessor

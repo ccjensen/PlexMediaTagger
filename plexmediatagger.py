@@ -24,6 +24,7 @@ import re
 import unicodedata
 import signal
 import logging
+import threading
 
 from xml.etree import ElementTree
 from optparse import OptionParser
@@ -185,6 +186,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         results = statistics.results()
         for result in results:
             logging.error(result)
+        #end for
+    #end if stats
 #end main
 
 
@@ -199,6 +202,7 @@ def signal_handler(signal, frame):
 
 def abort():
     logging.critical( "\r========== Terminating Plex Media Tagger ==========" )
+    section_processor.event.wait()
     sys.exit(0)
 #end def
 
