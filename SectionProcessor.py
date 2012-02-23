@@ -25,6 +25,7 @@ class SectionProcessor:
         self.request_handler = request_handler
         self.event = threading.Event()
         self.event.set()
+        self.abort = False
     #end def __init__
     
     def process_section(self, section_element):
@@ -181,5 +182,4 @@ class SectionProcessor:
         video_item_processor = VideoItemProcessor(self.opts, video_item)
         video_item_processor.process()
         self.event.set()
-        time.sleep(3)
 #end SectionProcessor
