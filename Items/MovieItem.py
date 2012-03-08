@@ -67,6 +67,11 @@ class MovieItem(VideoItem):
     #end def
     
     def export_image(self, desired_local_path):
+        if len(self.thumb) == 0:
+            logging.warning("Could not find movie artwork...")
+            return
+        
+        
         request_handler = PmsRequestHandler()
         partial_image_url = self.thumb
         logging.info("Downloading artwork...")
@@ -79,14 +84,15 @@ class MovieItem(VideoItem):
         #end if not dryrun
     #end export_image
     
-    def tag_string(self):        
+    def tag_string(self):
+        tag_string = ""
+        tag_string += super(MovieItem, self).tag_string()
+        
         if self.local_image_path == "":
             self.export_image_to_temporary_location()
+        if self.local_image_path != "":
+            tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
 
-        tag_string = ""
-
-        tag_string += super(MovieItem, self).tag_string()
-        tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
         tag_string += self.new_tag_string_entry("Media Kind", "Movie")
         tag_string += self.new_tag_string_entry("Name", self.title)
         tag_string += self.new_tag_string_entry("Artist", self.directors)

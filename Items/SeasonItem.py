@@ -31,6 +31,10 @@ class SeasonItem(BaseItem):
     #end image_path
     
     def export_image(self, desired_local_path):
+        if len(self.thumb) == 0:
+            logging.warning("Could not find season artwork...")
+            return
+        
         request_handler = PmsRequestHandler()
         partial_image_url = self.thumb
         logging.info("Downloading season artwork...")
@@ -49,7 +53,8 @@ class SeasonItem(BaseItem):
         if self.opts.tag_prefer_season_artwork:
             if self.local_image_path == "":
                 self.export_image_to_temporary_location()
-            tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
+            if self.local_image_path != "":
+                tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
         
         #Example: "The X-Files, Season 1"
         tag_string += self.new_tag_string_entry("Album", self.show.title+", "+self.title)
