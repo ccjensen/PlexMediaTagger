@@ -55,6 +55,13 @@ class SeasonItem(BaseItem):
                 self.export_image_to_temporary_location()
             if self.local_image_path != "":
                 tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
+            else:
+                #use show artwork as fallback
+                self.show.export_image_to_temporary_location()
+                tag_string += self.new_tag_string_entry("Artwork", self.show.local_image_path)
+            #end if self.local_image_path != ""
+        #end if self.opts.tag_prefer_season_artwork
+                
         
         #Example: "The X-Files, Season 1"
         tag_string += self.new_tag_string_entry("Album", self.show.title+", "+self.title)

@@ -39,6 +39,28 @@ class ShowItem(BaseItem):
     def name(self):
         return "%s (%s)" % (self.title, self.year)
     #end def name
+
+    def export_image_to_temporary_location(self):
+        self.export_image(None)
+    #end image_path
+    
+    def export_image(self, desired_local_path):
+        if len(self.thumb) == 0:
+            logging.warning("Could not find show artwork...")
+            return
+        
+        request_handler = PmsRequestHandler()
+        partial_image_url = self.thumb
+        logging.info("Downloading show artwork...")
+        
+        image_filename = request_handler.filesystem_compatible_name(self.name())
+        if self.opts.dryrun:
+            self.local_image_path = "/tmp/%s.jpg" % image_filename
+        else:
+            self.local_image_path = request_handler.download_image(partial_image_url, image_filename, None)
+        #end if not dryrun
+    #end export_image
+
     
     def tag_string(self):
         tag_string = ""
