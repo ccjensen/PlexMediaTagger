@@ -119,7 +119,7 @@ class SectionProcessor:
         contents_type = movies_media_container_element.get('viewGroup', "")
         for index, partial_movie_item in enumerate(selected_movie_items):
             if self.abort:
-                raise Exception('aborting')
+                raise RuntimeError('aborting')
             partial_movie_media_container = self.request_handler.get_metadata_container_for_key(partial_movie_item.key)
             full_movie_item = MovieItem(self.opts, partial_movie_media_container)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_movie_items), contents_type, full_movie_item.name()) )
@@ -167,7 +167,7 @@ class SectionProcessor:
         contents_type = episodes_media_container_element.get('viewGroup', "")
         for index, partial_episode_item in enumerate(selected_episode_items):
             if self.abort:
-                raise Exception('aborting')
+                raise RuntimeError('aborting')
             partial_episode_media_container = self.request_handler.get_metadata_container_for_key(partial_episode_item.key)
             full_episode_item = EpisodeItem(self.opts, partial_episode_media_container, season)
             logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_episode_items), contents_type, full_episode_item.name()) )

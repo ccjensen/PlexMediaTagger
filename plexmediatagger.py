@@ -210,7 +210,7 @@ def abort():
 if __name__ == '__main__':
     try:
         sys.exit(main())
-    except:
+    except (EOFError, RuntimeError):
         abort()
     #end try
 #end if __name__
