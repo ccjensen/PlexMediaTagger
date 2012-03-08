@@ -34,6 +34,7 @@ class ShowItem(BaseItem):
         else: 
             self.genre = ''
         self.genres = ', '.join(self.genre_names)
+        self.local_image_path = ""
     #end def __init__
     
     def name(self):

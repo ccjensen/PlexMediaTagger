@@ -58,7 +58,8 @@ class SeasonItem(BaseItem):
             else:
                 #use show artwork as fallback
                 self.show.export_image_to_temporary_location()
-                tag_string += self.new_tag_string_entry("Artwork", self.show.local_image_path)
+                if self.show.local_image_path != "":
+                    tag_string += self.new_tag_string_entry("Artwork", self.show.local_image_path)
             #end if self.local_image_path != ""
         #end if self.opts.tag_prefer_season_artwork
                 

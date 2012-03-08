@@ -68,7 +68,7 @@ class EpisodeItem(VideoItem):
         tag_string = self.season.tag_string()
         tag_string += super(EpisodeItem, self).tag_string()
         
-        if not self.opts.tag_prefer_season_artwork:
+        if not self.opts.tag_prefer_season_artwork or not "{Artwork:" in tag_string:
             if self.local_image_path == "":
                 self.export_image_to_temporary_location()
             if self.local_image_path != "":
