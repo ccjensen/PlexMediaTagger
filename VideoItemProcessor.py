@@ -37,31 +37,50 @@ class VideoItemProcessor:
         if self.opts.force:
             return True
         
+        shouldTag = True
         comment_tag_contents = self.getFileCommentTagContents(part_item)
-        for word in comment_tag_contents.split(" "):
-            if word.startswith(DataTokens.itunes_tag_data_token):
-                logging.info("File previously tagged")
-                for item in word.split(DataTokens.tag_data_delimiter):
-                    if item.startswith(DataTokens.updated_at_token):
-                        tag_data_updated_at = item.split(DataTokens.updated_at_token)[1]
-                        metadata_updated_at = self.video_item.updated_at
-                        logging.debug("file:%s vs. pms:%s" % (tag_data_updated_at, metadata_updated_at))
-                        if (metadata_updated_at > tag_data_updated_at):
-                            logging.info("Metadata has changed since last time")
-                            return True
-                        else:
-                            logging.info("No change to the metadata since last time")
-                            return False
-                    #end inf
-                #end for
-                logging.info("Updated at token missing, will re-tag the file")
-        return True
+        if DataTokens.itunes_tag_data_token in comment_tag_contents:
+            logging.info("File previously tagged")
+            itunes_tag_data = comment_tag_contents.replace(DataTokens.itunes_tag_data_token, '')
+            for data_entry in itunes_tag_data.split(DataTokens.tag_data_delimiter):
+                if len(data_entry):
+                    data = data_entry.split(DataTokens.token_delimiter)
+                    if len(data) == 2:
+                        token = data[0]
+                        if token == DataTokens.updated_at_token:
+                            tag_data_updated_at = data[1]
+                            metadata_updated_at = self.video_item.updated_at
+                            logging.debug("Date tagged: file:%s vs. pms:%s" % (tag_data_updated_at, metadata_updated_at))
+                            if (metadata_updated_at > tag_data_updated_at):
+                                logging.info("Metadata has changed since last time")
+                                shouldTag = True
+                            else:
+                                logging.info("No change to the metadata since last time")
+                                shouldTag = False
+                            #end if metadata_updated_at
+                        elif token == DataTokens.itunes_playcount_token:
+                            #store the playcount in case we write out the tags
+                            logging.debug("Playcount tagged: file:%s vs. pms:%s" % (data[1], self.video_item.view_count))
+                            try:
+                                if int(data[1]) > int(self.video_item.view_count):
+                                    logging.info("Using playcount from embedded metadata")
+                                    self.video_item.view_count = data[1]
+                            except:
+                                continue
+                        elif token == DataTokens.itunes_rating_token:
+                            #do nothing
+                            shouldTag = shouldTag
+                        #end if token == x
+                    #end if len(data)
+                #end if len(data_entry)
+            #end for data_entry
+        #end if DataTokens.itunes_tag_data_token
+        return shouldTag
     #end def shouldTag
     
     def getFileCommentTagContents(self, part_item):
         """docstring for getFileCommentTagContents"""
         AtomicParsley = os.path.join(sys.path[0], "AtomicParsley32")
-        comment_tag = "Atom \"©cmt\""
 
         #Create the command line string
         get_tags_cmd = ['%s' % AtomicParsley]
@@ -78,8 +97,8 @@ class VideoItemProcessor:
         #end if 'AtomicParsley error' in result:
         
         for line in result.split("\n"):
-            if comment_tag in line:
-               return line
+            if DataTokens.atomicparsely_comment_token in line:
+                return line.replace(DataTokens.atomicparsely_comment_token, '')
 
         logging.info("File untagged")
         return ""

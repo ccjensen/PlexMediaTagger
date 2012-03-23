@@ -37,9 +37,9 @@ class VideoItem(BaseItem):
     
     def create_new_comment_tag_contents(self):        
         rating = int( float(self.rating) * 10 )
-        rating_str = "%s%i" % (DataTokens.itunes_rating_token, rating)
-        play_count_str = DataTokens.itunes_playcount_token + self.view_count
-        updated_at_str = DataTokens.updated_at_token + self.updated_at
+        rating_str = "%s%s%i" % (DataTokens.itunes_rating_token, DataTokens.token_delimiter, rating)
+        play_count_str = DataTokens.itunes_playcount_token + DataTokens.token_delimiter + self.view_count
+        updated_at_str = DataTokens.updated_at_token + DataTokens.token_delimiter + self.updated_at
         
         itunes = [DataTokens.itunes_tag_data_token, rating_str, play_count_str, updated_at_str]
         itunes_str = DataTokens.tag_data_delimiter.join(itunes)

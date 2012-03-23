@@ -8,8 +8,10 @@
 
 class DataTokens:
     tag_data_delimiter = "::::"
+    token_delimiter = "_"
     itunes_tag_data_token = "I_T_U_N_E_S"
-    itunes_rating_token = "R_"
-    itunes_playcount_token = "PC_"
-    updated_at_token = "D_"
+    itunes_rating_token = "R"
+    itunes_playcount_token = "PC"
+    updated_at_token = "D"
+    atomicparsely_comment_token = "Atom \"©cmt\" contains:"
 #end class DataTokens
