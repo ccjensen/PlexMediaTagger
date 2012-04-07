@@ -20,8 +20,7 @@ class MediaItem(BaseItem):
         resolution = self.media_element.get('videoResolution', "")
         self.is_HD = resolution.isdigit() and int(resolution) >= 720
         
-        part_element = self.media_element.find("Part")
-        self.part_item = PartItem(self.opts, self, part_element)
+        self.part_items = [PartItem(self.opts, self, part_element) for part_element in self.media_element.findall("Part")]
     #end def __init__
     
     def tag_string(self):

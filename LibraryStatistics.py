@@ -9,6 +9,7 @@
 from datetime import datetime, timedelta
 from Items.MovieItem import MovieItem
 from Items.EpisodeItem import EpisodeItem
+from Console import *
 
 class LibraryStatistics:
     __shared_state = {}
@@ -29,7 +30,8 @@ class LibraryStatistics:
 
     def results(self):
         results = []
-        seperator = "-"*45
+        
+        seperator = "-" * max(int(get_terminal_size()[0]/2), 55)
         
         total_number_of_items = self.number_of_episodes+self.number_of_movies
         results.append("Number of items: \t\t%d" % ( total_number_of_items ))
@@ -140,21 +142,22 @@ class LibraryStatistics:
         elif video_item_class == MovieItem:
             self.number_of_movies += 1
         
-        media_item = video_item.media_item
-        part_items = [media_item.part_item]
-        
-        for i, part_item in enumerate(part_items):
-            duration = part_item.duration
-            if duration == "":
-                self.notes[self.no_duration_key].append(video_item.name())
-                duration = 0
+        media_items = video_item.media_items
+        for media_item in media_items:
+            part_items = media_item.part_items
+            for part_item in part_items:
+                duration = part_item.duration
+                if duration == "":
+                    self.notes[self.no_duration_key].append(video_item.name())
+                    duration = 0
                 
-            seconds = int(duration)/1000
-            if video_item_class == EpisodeItem:
-                self.total_duration_episodes += seconds
-            elif video_item_class == MovieItem:
-                self.total_duration_movies += seconds
-            #end if
-        #end for
+                seconds = int(duration)/1000
+                if video_item_class == EpisodeItem:
+                    self.total_duration_episodes += seconds
+                elif video_item_class == MovieItem:
+                    self.total_duration_movies += seconds
+                #end if
+            #end for part_items
+        #end for media_items
     #end def add_item
 #end def class LibraryStatistics

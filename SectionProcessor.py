@@ -12,6 +12,7 @@ import logging
 import sys
 import time
 
+from Console import *
 from Items.MovieItem import MovieItem
 from Items.ShowItem import ShowItem
 from Items.SeasonItem import SeasonItem
@@ -90,7 +91,7 @@ class SectionProcessor:
             logging.warning( "empty input equals all" )
             
             #ask user what videos should be processed
-            selection = raw_input("Item # to select $")
+            selection = raw_input(indent_text("Item # to select $"))
             if selection != '':
                 try:
                     selection = int(selection)
@@ -122,7 +123,7 @@ class SectionProcessor:
                 raise RuntimeError('aborting')
             partial_movie_media_container = self.request_handler.get_metadata_container_for_key(partial_movie_item.key)
             full_movie_item = MovieItem(self.opts, partial_movie_media_container)
-            logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_movie_items), contents_type, full_movie_item.name()) )
+            logging.warning( generate_right_padded_string("processing %d/%d %ss : %s " % (index+1, len(selected_movie_items), contents_type, full_movie_item.name()), "-") )
             threading.Thread(None, self.process_video(full_movie_item)).start()
             time.sleep(1)
             self.event.wait()
@@ -170,7 +171,7 @@ class SectionProcessor:
                 raise RuntimeError('aborting')
             partial_episode_media_container = self.request_handler.get_metadata_container_for_key(partial_episode_item.key)
             full_episode_item = EpisodeItem(self.opts, partial_episode_media_container, season)
-            logging.warning( "processing %d/%d %ss : %s" % (index+1, len(selected_episode_items), contents_type, full_episode_item.name()) )
+            logging.warning( generate_right_padded_string("processing %d/%d %ss : %s " % (index+1, len(selected_episode_items), contents_type, full_episode_item.name()), "-") )
             threading.Thread(None, self.process_video(full_episode_item)).start()
             time.sleep(1)
             self.event.wait()

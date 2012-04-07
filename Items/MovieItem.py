@@ -14,8 +14,7 @@ class MovieItem(VideoItem):
     """docstring for MovieItem"""
     def __init__(self, opts, movie_media_container):
         super(MovieItem, self).__init__(opts, movie_media_container)
-        media_element = self.video.find("Media")
-        self.media_item = MediaItem(self.opts, self, media_element)
+        self.media_items = [MediaItem(self.opts, self, media_element) for media_element in self.video.findall("Media")]
         
         self.key = self.video.attrib['key']
         self.studio = self.video.get('studio', "")

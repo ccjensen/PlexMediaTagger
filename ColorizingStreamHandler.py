@@ -9,8 +9,8 @@
 # to add support for indentation of message based upon stack trace depth
 
 import logging
-import traceback
 import os
+from Console import *
 
 class ColorizingStreamHandler(logging.StreamHandler):
     # color names to indices
@@ -132,15 +132,12 @@ class ColorizingStreamHandler(logging.StreamHandler):
                 message = ''.join((self.csi, ';'.join(params),
                                    'm', message, self.reset))
         return message
-
+    
     def format(self, record):
         message = logging.StreamHandler.format(self, record)
         if self.is_tty:
             # Don't colorize any traceback
             parts = message.split('\n', 1)
             parts[0] = self.colorize(parts[0], record)
-            message = '\n'.join(parts)        
-        
-        indentation_level = len(traceback.extract_stack()) - 10;
-        return (' '*indentation_level)+message
-#        return message
+            message = '\n'.join(parts)
+        return indent_text(message)

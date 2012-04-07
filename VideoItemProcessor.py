@@ -20,8 +20,7 @@ class VideoItemProcessor:
     def __init__(self, opts, video_item):
         self.opts = opts
         self.video_item = video_item
-        self.media_item = self.video_item.media_item
-        self.part_items = [self.media_item.part_item]
+        self.media_items = self.video_item.media_items
     #end def __init__
     
     def canTag(self, part_item):
@@ -294,26 +293,32 @@ class VideoItemProcessor:
         if self.opts.gather_statistics:
             skipped_all = False
             LibraryStatistics().add_item(self.video_item)
-        
-        for part_item in self.part_items:
-            Summary().increment_items_processed()
-            if self.opts.removetags and self.canTag(part_item):
-                skipped_all = False
-                self.remove_tags(part_item)
-            #end if removetags
-            if self.opts.tag and self.canTag(part_item) and self.shouldTag(part_item):
-                skipped_all = False
-                self.tag(part_item)
-            #end if tag   
-            if self.opts.optimize and not self.opts.tag and not self.opts.removetags and self.canTag(part_item):
-                #optimize is done together with tagging or removing, so only needs to be done here if it's the exclusive action
-                skipped_all = False
-                self.optimize(part_item)
-            #end if optimize
-            if self.opts.export_resources:
-                skipped_all = False
-                self.export_resources(part_item)
-            #end if export_resouces
+        #end if gather_statistics
+        for index, media_item in enumerate(self.media_items):
+            logging.warning( "processing %d/%d media_items" % ( index+1, len(self.media_items)) )
+            part_items = media_item.part_items
+            for index2, part_item in enumerate(part_items):
+                logging.warning( " processing %d/%d part_items" % ( index2+1, len(part_items)) )
+                Summary().increment_parts_processed()
+                if self.opts.removetags and self.canTag(part_item):
+                    skipped_all = False
+                    self.remove_tags(part_item)
+                #end if removetags
+                if self.opts.tag and self.canTag(part_item) and self.shouldTag(part_item):
+                    skipped_all = False
+                    self.tag(part_item)
+                #end if tag   
+                if self.opts.optimize and not self.opts.tag and not self.opts.removetags and self.canTag(part_item):
+                    #optimize is done together with tagging or removing, so only needs to be done here if it's the exclusive action
+                    skipped_all = False
+                    self.optimize(part_item)
+                #end if optimize
+                if self.opts.export_resources:
+                    skipped_all = False
+                    self.export_resources(part_item)
+                #end if export_resouces
+            #end for part_items
+        #end for media_items
         if skipped_all:
             logging.warning("skipping: no valid files for specified tasks")
         #end if skipped_all

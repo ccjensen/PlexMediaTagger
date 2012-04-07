@@ -53,13 +53,13 @@ class Summary:
         if total_items > 0:
             results.append("Artwork exported: \t\t%d, \tFailed: %d, \tTotal: %d" % ( self.artwork_export_success, self.artwork_export_fail, total_items ))
         
-        results.append("Items processed: \t\t%d" % ( self.items_processed ))
+        results.append("Parts processed: \t\t%d" % ( self.items_processed ))
             
         duration = str(now_time - self.time_start).split('.')[0]
         results.append("Execution Duration: \t\t%s" % duration)
         return results
     
-    def increment_items_processed(self):
+    def increment_parts_processed(self):
         self.items_processed += 1
     
     def metadata_removal_succeeded(self):
