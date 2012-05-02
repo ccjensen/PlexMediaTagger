@@ -55,6 +55,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
 ")
     parser.add_option(  "-t", "--tag", action="store_true", dest="tag",
                         help="tag all compatible file types, and update any previously tagged files (if metadata in plex has changed)")
+    parser.add_option(  "--tag-update", action="store_true", dest="tag_update",
+                        help="update previously tagged files if the PMS entry has changed since last time (modification time)")
     parser.add_option(  "--tag-tv-prefer-season-artwork", action="store_true", dest="tag_prefer_season_artwork",
                         help="when tagging tv show episodes, the season artwork will be used instead of the episode thumbnail")
     
@@ -90,7 +92,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "-d", "--dry-run", action="store_true", dest="dryrun",
                         help="pretend to do the job, but never actually change or export anything. Pretends that all tasks succeed. Useful for testing purposes")
 
-    parser.set_defaults( tag=False, tag_prefer_season_artwork=False, remove_tags=False, optimize=False, 
+    parser.set_defaults( tag=False, tag_update=False, tag_prefer_season_artwork=False, remove_tags=False, optimize=False, 
                         export_resources=False, export_subtitles=False, export_artwork=False, gather_statistics=False,
                         force_tagging=False, interactive=True, quiet=False, dryrun=False,
                         ip="localhost", port=32400, path_modifications=[])
@@ -105,6 +107,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     if opts.tag_prefer_season_artwork and not opts.tag:
         parser.error("Cannot prefer season artwork when not tagging...")
+        
+    if opts.tag_update and not opts.tag:
+        parser.error("Cannot update tags when not tagging...")
     
     if opts.quiet:
         root.setLevel(logging.ERROR)

@@ -40,39 +40,44 @@ class VideoItemProcessor:
         comment_tag_contents = self.getFileCommentTagContents(part_item)
         if DataTokens.itunes_tag_data_token in comment_tag_contents:
             logging.info("File previously tagged")
-            itunes_tag_data = comment_tag_contents.replace(DataTokens.itunes_tag_data_token, '')
-            for data_entry in itunes_tag_data.split(DataTokens.tag_data_delimiter):
-                if len(data_entry):
-                    data = data_entry.split(DataTokens.token_delimiter)
-                    if len(data) == 2:
-                        token = data[0]
-                        if token == DataTokens.updated_at_token:
-                            tag_data_updated_at = data[1]
-                            metadata_updated_at = self.video_item.updated_at
-                            logging.debug("Date tagged: file:%s vs. pms:%s" % (tag_data_updated_at, metadata_updated_at))
-                            if (metadata_updated_at > tag_data_updated_at):
-                                logging.info("Metadata has changed since last time")
-                                shouldTag = True
-                            else:
-                                logging.info("No change to the metadata since last time")
-                                shouldTag = False
-                            #end if metadata_updated_at
-                        elif token == DataTokens.itunes_playcount_token:
-                            #store the playcount in case we write out the tags
-                            logging.debug("Playcount tagged: file:%s vs. pms:%s" % (data[1], self.video_item.view_count))
-                            try:
-                                if int(data[1]) > int(self.video_item.view_count):
-                                    logging.info("Using playcount from embedded metadata")
-                                    self.video_item.view_count = data[1]
-                            except:
-                                continue
-                        elif token == DataTokens.itunes_rating_token:
-                            #do nothing
-                            shouldTag = shouldTag
-                        #end if token == x
-                    #end if len(data)
-                #end if len(data_entry)
-            #end for data_entry
+            if self.opts.tag_update:
+                itunes_tag_data = comment_tag_contents.replace(DataTokens.itunes_tag_data_token, '')
+                for data_entry in itunes_tag_data.split(DataTokens.tag_data_delimiter):
+                    if len(data_entry):
+                        data = data_entry.split(DataTokens.token_delimiter)
+                        if len(data) == 2:
+                            token = data[0]
+                            if token == DataTokens.updated_at_token:
+                                tag_data_updated_at = data[1]
+                                metadata_updated_at = self.video_item.updated_at
+                                logging.debug("Date tagged: file:%s vs. pms:%s" % (tag_data_updated_at, metadata_updated_at))
+                                if (metadata_updated_at > tag_data_updated_at):
+                                    logging.info("Metadata has changed since last time")
+                                    shouldTag = True
+                                else:
+                                    logging.info("No change to the metadata since last time")
+                                    shouldTag = False
+                                #end if metadata_updated_at
+                            elif token == DataTokens.itunes_playcount_token:
+                                #store the playcount in case we write out the tags
+                                logging.debug("Playcount tagged: file:%s vs. pms:%s" % (data[1], self.video_item.view_count))
+                                try:
+                                    if int(data[1]) > int(self.video_item.view_count):
+                                        logging.info("Using playcount from embedded metadata")
+                                        self.video_item.view_count = data[1]
+                                except:
+                                    continue
+                            elif token == DataTokens.itunes_rating_token:
+                                #do nothing
+                                shouldTag = shouldTag
+                            #end if token == x
+                        #end if len(data)
+                    #end if len(data_entry)
+                #end for data_entry
+            else:
+                #file previously tagged, no need to tag it again
+                shouldTag = False
+            #end if tag_update
         #end if DataTokens.itunes_tag_data_token
         return shouldTag
     #end def shouldTag
@@ -320,7 +325,7 @@ class VideoItemProcessor:
             #end for part_items
         #end for media_items
         if skipped_all:
-            logging.warning("skipping: no valid files for specified tasks")
+            logging.warning("skipping: no files for specified tasks")
         #end if skipped_all
     #end def process_item
 #end MediaPartProcessor

@@ -35,6 +35,8 @@ Options:
  `-t, --tag`           tag all compatible file types, and update any  
                        previously tagged files (if metadata in plex has  
                        changed)  
+  `--tag-update`       update previously tagged files if the PMS entry has  
+                       changed since last time (modification time)  
   `--tag-tv-prefer-season-artwork`
                        when tagging tv show episodes, the season artwork will  
                        be used instead of the episode thumbnail  
