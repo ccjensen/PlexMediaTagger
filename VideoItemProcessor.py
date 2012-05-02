@@ -325,7 +325,7 @@ class VideoItemProcessor:
             #end for part_items
         #end for media_items
         if skipped_all:
-            logging.warning("skipping: no files for specified tasks")
+            logging.warning("skipping: found no suitable files for specified tasks")
         #end if skipped_all
     #end def process_item
 #end MediaPartProcessor
