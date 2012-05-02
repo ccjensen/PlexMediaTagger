@@ -14,7 +14,7 @@ class EpisodeItem(VideoItem):
     def __init__(self, opts, episode_media_container, season):
         super(EpisodeItem, self).__init__(opts, episode_media_container)
         media_element = self.video.find("Media")
-        self.media_item = MediaItem(self.opts, self, media_element)
+        self.media_items = [MediaItem(self.opts, self, media_element) for media_element in self.video.findall("Media")]
         
         self.season = season
         self.show = season.show
