@@ -11,6 +11,7 @@ import threading
 import logging
 import sys
 import time
+import copy
 
 from Console import *
 from Items.MovieItem import MovieItem
@@ -30,10 +31,15 @@ class SectionProcessor:
     #end def __init__
     
     def process_section(self, section_element):
+        self.breadcrumb = copy.deepcopy(self.opts.batch_breadcrumb)
         section_element_type = section_element.attrib['type']
         if section_element_type == "movie":
+            self.movie_title_breadcrumb = self.breadcrumb.pop() if len(self.breadcrumb) > 0 else ''
             self.process_movie_section_element(section_element)
         elif section_element_type == "show":
+            self.show_title_breadcrumb = self.breadcrumb.pop() if len(self.breadcrumb) > 0 else ''
+            self.season_title_breadcrumb = self.breadcrumb.pop() if len(self.breadcrumb) > 0 else ''
+            self.episode_title_breadcrumb = self.breadcrumb.pop() if len(self.breadcrumb) > 0 else ''
             self.process_show_section_element(section_element)
         else:
             logging.error( "'%s' content type is not supported" % section_element_type )
@@ -42,23 +48,40 @@ class SectionProcessor:
 
     def get_selection_for_media_container_element(self, media_container_element, context=None):
         view_group = media_container_element.attrib['viewGroup']
+        breadcrumb = ''
         if view_group == 'movie':
             container_title = media_container_element.attrib['title1']
-            list_of_items = [MovieItem(self.opts, item) for item in media_container_element.getchildren()]
         elif view_group == 'show':
             container_title = media_container_element.attrib['title1']
-            list_of_items = [ShowItem(self.opts, item) for item in media_container_element.getchildren()]
         elif view_group == 'season':
             container_title = media_container_element.attrib['title2']
-            list_of_items = [SeasonItem(self.opts, item, context) for item in media_container_element.getchildren()]
         elif view_group == 'episode':
             container_title = media_container_element.attrib['title2']
+        else:
+            logging.error( "'%s' view group is not supported" % view_group )
+            return
+        #end if view_group
+        
+        if view_group == 'movie':
+            breadcrumb = self.movie_title_breadcrumb
+            list_of_items = [MovieItem(self.opts, item) for item in media_container_element.getchildren()]
+        elif view_group == 'show':
+            breadcrumb = self.show_title_breadcrumb
+            list_of_items = [ShowItem(self.opts, item) for item in media_container_element.getchildren()]
+        elif view_group == 'season':
+            breadcrumb = self.season_title_breadcrumb
+            list_of_items = [SeasonItem(self.opts, item, context) for item in media_container_element.getchildren()]
+        elif view_group == 'episode':
+            breadcrumb = self.episode_title_breadcrumb
             list_of_items = [EpisodeItem(self.opts, item, context) for item in media_container_element.getchildren()]
         #end if view_group
         
         list_of_items_without_containers = []
         #filter the list
         for item in list_of_items:
+            if not breadcrumb in item.title.lower():
+                logging.info( " Disregarding '%s' because it does not match breadcrumb '%s'" % (item.title, breadcrumb) )
+                continue
             if item.title != "All episodes":
                 list_of_items_without_containers.append(item)
             #end if

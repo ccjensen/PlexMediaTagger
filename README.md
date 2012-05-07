@@ -24,6 +24,12 @@ Note: Embedding metadata in files only works on OS X, as it uses a tool that unf
 		Example 1: plexmediatagger.py --tag
 		Example 2: plexmediatagger.py -bq --tag --remove-all-tags --optimize -e subtitles -ip 192.168.0.2 --port 55400
 		Example 3: plexmediatagger.py --subtitles -m 'D:\Movies' '/Volumes/Media/Movies' -m '\' '/'
+		Example 4: plexmediatagger.py -tb --batch-mediatype=movie --batch-breadcrumb='kids>cars'
+			only tag movies who are in a section containing the word 'kids' and movies who's name contains 'cars'
+		Example 5: plexmediatagger.py -tb --batch-mediatype=show --batch-breadcrumb='>lost>season 1>pilot'
+			only tag tv episodes, matches all sections, show name contains lost, season 1, episode title contains 'pilot'
+		Example 6: plexmediatagger.py -tb --batch-breadcrumb='tv>weeds>>goat'
+			only tag items who are in a section who's title contains 'tv', where the movie or show name contains 'weeds', any season and episode title contains 'goat'
 
 The tool uses the comment metadata field to store metadata that does not have its own tag, but is a value that iTunes stores in its internal database (such as rating and playcount). There is an iTunes script in the extra's folder that can load this information into iTunes. So after the tools has run and embedded the information, select the corresponding file in iTunes and run the script. This will load in that extra information that cannot be embedded.
 
@@ -60,10 +66,16 @@ Options:
                        connect to (default is localhost)  
  `-p PORT, --port=PORT`specify an alternate port number to use when  
                        connecting to the PMS (default is 32400)  
+ `--interactive`       interactivly select files to operate on [default]  
  `-b, --batch`         disable interactive mode. Requires no human  
                        intervention once launched, and will perform  
                        operations on all valid files  
- `--interactive`       interactivly select files to operate on [default]  
+  `--batch-mediatype=[movie/show]`  
+                       only specified media type will be processed  
+  `--batch-breadcrumb=breadcrumb`  
+                       only items matching the breadcrumb trail will be  
+                       processed. Components seperated by '>' (case  
+                       insensitive)  
  `-v, --verbose`       increase verbosity (can be supplied 0-2 times)  
  `-q, --quiet`         ninja-like processing (can only be used when in batch  
                        mode)  

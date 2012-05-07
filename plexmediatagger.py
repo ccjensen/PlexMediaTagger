@@ -27,7 +27,7 @@ import logging
 import threading
 
 from xml.etree import ElementTree
-from optparse import OptionParser
+from optparse import OptionParser, OptionValueError
 from ColorizingStreamHandler import *
 from PmsRequestHandler import *
 from SectionProcessor import *
@@ -50,6 +50,12 @@ def main():
 Example 1: %prog --tag\n\
 Example 2: %prog -bq --tag --remove-all-tags --optimize -e subtitles -ip 192.168.0.2 --port 55400\n\
 Example 3: %prog --subtitles -m 'D:\Movies' '/Volumes/Media/Movies' -m '\\' '/'\n\
+Example 4: %prog -tb --batch-mediatype=movie --batch-breadcrumb='kids>cars'\n\
+\tonly tag movies who are in a section containing the word 'kids' and movies who's name contains 'cars'\n\
+Example 5: %prog -tb --batch-mediatype=show --batch-breadcrumb='>lost>season 1>pilot'\n\
+\tonly tag tv episodes, matches all sections, show name contains lost, season 1, episode title contains 'pilot'\n\
+Example 6: %prog -tb --batch-breadcrumb='tv>weeds>>goat'\n\
+\tonly tag items who are in a section who's title contains 'tv', where the movie or show name contains 'weeds', any season and episode title contains 'goat' \n\
 %prog -h for full list of options\n\n\
 Filepaths to media items in PMS need to be the same as on machine that is running this script (can be worked around by using the -m option to modify the file path).\
 ")
@@ -80,10 +86,15 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "-p", "--port", action="store", dest="port", type="int",
                         help="specify an alternate port number to use when connecting to the PMS (default is 32400)")
     
-    parser.add_option(  "-b", "--batch", action="store_false", dest="interactive",
-                        help="disable interactive mode. Requires no human intervention once launched, and will perform operations on all valid files")
     parser.add_option(  "--interactive", action="store_true", dest="interactive",
                         help="interactivly select files to operate on [default]")
+    parser.add_option(  "-b", "--batch", action="store_false", dest="interactive",
+                        help="disable interactive mode. Requires no human intervention once launched, and will perform operations on all valid files")
+    parser.add_option(  "--batch-mediatype", action="store", dest="batch_mediatype", type="choice", choices=["any", "movie", "show"], metavar="[movie/show]",
+                        help="only specified media type will be processed")
+    parser.add_option(  "--batch-breadcrumb", action="store", dest="batch_breadcrumb", type="string", metavar="breadcrumb",
+                        help="only items matching the breadcrumb trail will be processed. Components seperated by '>' (case insensitive)")
+
 
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
                         callback=setLogLevel, help='increase verbosity (can be supplied 0-2 times)')
@@ -94,10 +105,14 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
 
     parser.set_defaults( tag=False, tag_update=False, tag_prefer_season_artwork=False, remove_tags=False, optimize=False, 
                         export_resources=False, export_subtitles=False, export_artwork=False, gather_statistics=False,
-                        force_tagging=False, interactive=True, quiet=False, dryrun=False,
+                        force_tagging=False, dryrun=False,
+                        interactive=True, quiet=False, batch_mediatype="any", batch_breadcrumb="",
                         ip="localhost", port=32400, path_modifications=[])
     
-    opts, args = parser.parse_args()
+    try:
+        opts, args = parser.parse_args()
+    except OptionValueError as e:
+        parser.error(e)
     
     if opts.export_subtitles or opts.export_artwork:
         opts.export_resources = True
@@ -110,6 +125,13 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         
     if opts.tag_update and not opts.tag:
         parser.error("Cannot update tags when not tagging...")
+    
+    if opts.interactive and ( len(opts.batch_mediatype) > 0 or len(opts.batch_breadcrumb) > 0):
+        parser.error("Cannot use batch filtering options when batch mode is not active...")
+    
+    if len(opts.batch_breadcrumb) > 0:
+        opts.batch_breadcrumb = opts.batch_breadcrumb.split(">")
+        opts.batch_breadcrumb.reverse()
     
     if opts.quiet:
         root.setLevel(logging.ERROR)
@@ -171,10 +193,24 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         section_elements_to_process = [section_elements[section_element_choice]]
     #end if
     
+    breadcrumb = opts.batch_breadcrumb.pop() if len(opts.batch_breadcrumb) > 0 else ''
     logging.error( "Processing sections" )
     for index, section_element in enumerate(section_elements_to_process):
         section_title = section_element.attrib['title']
         logging.error( generate_right_padded_string("Processing section %d/%d : '%s' " % (index+1, len(section_elements_to_process), section_title)) )
+        
+        #check mediatype
+        if opts.batch_mediatype != 'any':
+            section_type = section_element.attrib['type']
+            if opts.batch_mediatype != section_type:
+                logging.error( " Skipping '%s' because it is not of type '%s'" % (section_title, opts.batch_mediatype) )
+                continue
+                
+        #check breadcrumb
+        if not breadcrumb in section_title.lower():
+            logging.error( " Skipping '%s' because it does not match breadcrumb '%s'" % (section_title, breadcrumb) )
+            continue
+        
         section_processor.process_section(section_element)
         if section_processor.abort:
             break
