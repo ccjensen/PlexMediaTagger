@@ -80,6 +80,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="gather \"interesting\" statistics about the items being processed")
     parser.add_option(  "-m", action="append", type="string", dest="path_modifications", nargs=2, metavar="<find> <replace>",
                         help="perform a find & replace operation on the pms' media file paths (useful if you are running the script on a different machine than the one who is hosting the pms, i.e. the mount paths are different). Supply multiple times to perform several different replacements (operations are performed in order supplied).")
+    parser.add_option(  "--open", action="store_true", dest="open_file_location",
+                        help="open a Finder window at the containing folder of the file just processed (Mac OS X only)")
                         
     parser.add_option(  "-i", "--ip", action="store", dest="ip", type="string",
                         help="specify an alternate IP address that hosts a PMS to connect to (default is localhost)")
@@ -95,7 +97,6 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "--batch-breadcrumb", action="store", dest="batch_breadcrumb", type="string", metavar="breadcrumb",
                         help="only items matching the breadcrumb trail will be processed. Components seperated by '>' (case insensitive)")
 
-
     parser.add_option(  "-v", "--verbose", dest="verbose", action="callback", 
                         callback=setLogLevel, help='increase verbosity (can be supplied 0-2 times)')
     parser.add_option(  "-q", "--quiet", action="store_true", dest="quiet",
@@ -103,8 +104,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "-d", "--dry-run", action="store_true", dest="dryrun",
                         help="pretend to do the job, but never actually change or export anything. Pretends that all tasks succeed. Useful for testing purposes")
 
-    parser.set_defaults( tag=False, tag_update=False, tag_prefer_season_artwork=False, remove_tags=False, optimize=False, 
-                        export_resources=False, export_subtitles=False, export_artwork=False, gather_statistics=False,
+    parser.set_defaults( tag=False, tag_update=False, tag_prefer_season_artwork=False, remove_tags=False, 
+                        optimize=False, export_resources=False, export_subtitles=False, export_artwork=False, 
+                        gather_statistics=False, open_file_location=False,
                         force_tagging=False, dryrun=False,
                         interactive=True, quiet=False, batch_mediatype="any", batch_breadcrumb="",
                         ip="localhost", port=32400, path_modifications=[])

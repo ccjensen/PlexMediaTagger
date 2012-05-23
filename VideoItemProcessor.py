@@ -127,11 +127,11 @@ class VideoItemProcessor:
         
         #end if dryrun
         if "Error" in result:
-            logging.critical("Failed %s for %s: %s" % (action_description, actionable_file_path, result.strip()) )
+            logging.critical("Failed %s for '%s': %s" % (action_description, actionable_file_path, result.strip()) )
             return False
         else:
             #success
-            logging.warning("'%s': %s" % (action_description, actionable_file_path))
+            logging.warning("'%s': '%s'" % (action_description, actionable_file_path))
             return True
         #end if "Error"
     #end def execute_command
@@ -223,7 +223,15 @@ class VideoItemProcessor:
         filename = os.path.basename(part_item_file_path)
         filename_without_extension = os.path.splitext(filename)[0]
         
-        os.chdir(directory)
+        try:
+            os.chdir(directory)
+        except OSError as (errorstr):
+#            OSError: [Errno 2] No such file or directory: '/Volumes/Drobo/aaa'
+            logging.critical("Failed 'resource export': %s" % (errorstr) )
+            logging.critical('Do you have any "yellow exclamation marks" in the Plex Media Manager?')
+            return False
+        #end try
+            
         #=== subtitles ===
         #build up language_code dict
         if self.opts.export_subtitles:
@@ -303,25 +311,31 @@ class VideoItemProcessor:
             logging.warning( "processing %d/%d media_items" % ( index+1, len(self.media_items)) )
             part_items = media_item.part_items
             for index2, part_item in enumerate(part_items):
+                no_action = True
                 logging.warning( " processing %d/%d part_items" % ( index2+1, len(part_items)) )
                 Summary().increment_parts_processed()
                 if self.opts.removetags and self.canTag(part_item):
-                    skipped_all = False
+                    skipped_all = no_action = False
                     self.remove_tags(part_item)
                 #end if removetags
                 if self.opts.tag and self.canTag(part_item) and self.shouldTag(part_item):
-                    skipped_all = False
+                    skipped_all = no_action = False
                     self.tag(part_item)
                 #end if tag   
                 if self.opts.optimize and not self.opts.tag and not self.opts.removetags and self.canTag(part_item):
                     #optimize is done together with tagging or removing, so only needs to be done here if it's the exclusive action
-                    skipped_all = False
+                    skipped_all = no_action = False
                     self.optimize(part_item)
                 #end if optimize
                 if self.opts.export_resources:
-                    skipped_all = False
+                    skipped_all = no_action = False
                     self.export_resources(part_item)
                 #end if export_resouces
+                if self.opts.open_file_location and not no_action:
+                    logging.warning("opening '%s'..." % part_item.modified_file_path())
+                    command = ['open', "-R", part_item.modified_file_path()]
+                    subprocess.call(command)
+                #end if self.opts.open_file_location
             #end for part_items
         #end for media_items
         if skipped_all:
