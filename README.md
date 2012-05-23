@@ -62,6 +62,8 @@ Options:
                        i.e. the mount paths are different). Supply multiple  
                        times to perform several different replacements  
                        (operations are performed in order supplied).  
+  `--open`             open a Finder window at the containing folder of the  
+                       file just processed (Mac OS X only)  
  `-i IP, --ip=IP`      specify an alternate IP address that hosts a PMS to  
                        connect to (default is localhost)  
  `-p PORT, --port=PORT`specify an alternate port number to use when  
