@@ -309,22 +309,30 @@ class VideoItemProcessor:
         item_title = self.video_item.title
         actionable_file_path = part_item.modified_file_path()
         
-        search_string = 'set currentItems to search playlist "%s" for "%s" only displayed' % (itunes_playlist, item_title)
-        does_item_exist_command = ["osascript", '-e', 'tell application "iTunes"', '-e', 'try' ,'-e', search_string, '-e', 'set currentItem to item 1 of currentItems', '-e', 'set loc to (location of currentItem)', '-e', 'POSIX path of loc', '-e', 'end try', '-e', 'end tell']
         if not self.opts.force:
             logging.warning("Finding '%s' in iTunes..." % actionable_file_path)
-            result = subprocess.Popen(does_item_exist_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0].rstrip()
-        
-            if result == actionable_file_path:
-                logging.warning("  Already added to iTunes")
-                return
-            #end if result == actionable_file_path:
+            
+            search_string = 'set currentItems to search playlist "%s" for "%s" only displayed' % (itunes_playlist, item_title)
+            delimiter = "###"
+            result_creation_string = 'set output to output & "%s"' % delimiter
+            does_item_exist_command = ["osascript", '-e', 'tell application "iTunes"', '-e', 'try' ,'-e', search_string, '-e', 'set output to ""', '-e', 'repeat with currentItem in currentItems', '-e', 'set loc to (location of currentItem)', '-e', 'if output is not equal to "" then', '-e', result_creation_string, '-e', 'end if', '-e', 'set output to output & POSIX path of loc', '-e', 'end repeat', '-e', 'output', '-e', 'end try', '-e', 'end tell']
+            logging.debug("'find in iTunes' script: %s" % (does_item_exist_command))
+            result_string = subprocess.Popen(does_item_exist_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0].rstrip()
+            result_file_paths = result_string.split(delimiter)
+            logging.debug("Find results in iTunes: %s" % result_file_paths)
+            for file_path in result_file_paths:
+                if file_path == actionable_file_path:
+                    logging.warning("  Already added to iTunes")
+                    return
+                #end if result == actionable_file_path:
+            #end for file_path in result_file_paths
         #end if not self.opts.force
         
         logging.warning("  Adding to iTunes...")
         file_str = 'set p to (POSIX file "%s")' % actionable_file_path
         add_to_playlist_str = 'add p to playlist "%s"' % itunes_playlist
         add_to_itunes_command = ['osascript', '-e', 'try', '-e', file_str, '-e', 'tell application "iTunes"', '-e', add_to_playlist_str, '-e', 'end tell', '-e', 'end try']
+        logging.debug("'add to iTunes' script: %s" % (add_to_itunes_command))
         result = subprocess.Popen(add_to_itunes_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0].rstrip()
         if result.startswith("file track id"):
             Summary().add_to_itunes_succeeded()
@@ -332,8 +340,9 @@ class VideoItemProcessor:
             current_item_str = 'tell %s' % result
             set_rating_str = 'set rating to %i as integer' % self.video_item.itunes_rating()
             set_play_count_str = 'set played count to %s as integer' % self.video_item.view_count
-            add_to_itunes_command = ['osascript', '-e', 'try', '-e', 'tell application "iTunes"', '-e', current_item_str, '-e', set_play_count_str, '-e', set_rating_str, '-e', 'end tell', '-e', 'end tell', '-e', 'end try']
-            subprocess.call(add_to_itunes_command)
+            add_metadata_to_itunes_command = ['osascript', '-e', 'try', '-e', 'tell application "iTunes"', '-e', current_item_str, '-e', set_play_count_str, '-e', set_rating_str, '-e', 'end tell', '-e', 'end tell', '-e', 'end try']
+            logging.debug("'add additional metadata iTunes' script: %s" % (add_metadata_to_itunes_command))
+            subprocess.call(add_metadata_to_itunes_command)
         else:
             Summary().add_to_itunes_failed()
             logging.critical("Failed 'add to iTunes' for '%s'. Incorrect path or not a compatible file type?" % (actionable_file_path) )
