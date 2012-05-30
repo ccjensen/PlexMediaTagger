@@ -69,7 +69,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "-r", "--remove-tags", action="store_true", dest="removetags",
                         help="remove all compatible tags from the files")
     parser.add_option(  "-f", "--force", action="store_true", dest="force",
-                        help="ignore previous work and steam ahead with task (will re-tag previously tagged files, etc.)")
+                        help="ignore previous work and steam ahead with task (will re-tag previously tagged files, re-enters data into iTunes, etc.)")
     parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
                         help="interleave the audio and video samples, and put the \"MooV\" atom at the beginning of the file")
     parser.add_option(  "--subtitles", action="store_true", dest="export_subtitles",
@@ -82,6 +82,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="perform a find & replace operation on the pms' media file paths (useful if you are running the script on a different machine than the one who is hosting the pms, i.e. the mount paths are different). Supply multiple times to perform several different replacements (operations are performed in order supplied).")
     parser.add_option(  "--open", action="store_true", dest="open_file_location",
                         help="open a Finder window at the containing folder of the file just processed (Mac OS X only)")
+
+    parser.add_option(  "--add-to-itunes", action="store_true", dest="add_to_itunes",
+                        help="adds the item to iTunes if not already present")
                         
     parser.add_option(  "-i", "--ip", action="store", dest="ip", type="string",
                         help="specify an alternate IP address that hosts a PMS to connect to (default is localhost)")
@@ -106,7 +109,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
 
     parser.set_defaults( tag=False, tag_update=False, tag_prefer_season_artwork=False, remove_tags=False, 
                         optimize=False, export_resources=False, export_subtitles=False, export_artwork=False, 
-                        gather_statistics=False, open_file_location=False,
+                        gather_statistics=False, open_file_location=False, add_to_itunes=False,
                         force_tagging=False, dryrun=False,
                         interactive=True, quiet=False, batch_mediatype="any", batch_breadcrumb="",
                         ip="localhost", port=32400, path_modifications=[])
@@ -119,7 +122,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     if opts.export_subtitles or opts.export_artwork:
         opts.export_resources = True
     
-    if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources and not opts.gather_statistics:
+    if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources and not opts.add_to_itunes and not opts.gather_statistics:
         parser.error("No task to perform. Our work here is done...")
     
     if opts.tag_prefer_season_artwork and not opts.tag:
@@ -128,7 +131,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     if opts.tag_update and not opts.tag:
         parser.error("Cannot update tags when not tagging...")
     
-    if opts.interactive and ( len(opts.batch_mediatype) > 0 or len(opts.batch_breadcrumb) > 0):
+    if opts.interactive and ( opts.batch_mediatype != "any" or len(opts.batch_breadcrumb) > 0):
         parser.error("Cannot use batch filtering options when batch mode is not active...")
     
     if len(opts.batch_breadcrumb) > 0:
@@ -145,6 +148,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         logging.critical( "WARNING, RUNNING IN 'DRY RUN MODE'. NO ACTUAL CHANGES WILL BE MADE" )
     elif opts.removetags:
         logging.critical( "WARNING, TAGS WILL BE REMOVED PERMANENTLY" )
+    elif opts.force:
+        logging.critical( "FORCE MODE ENABLED. THIS WILL BYPASS ANY 'HAS THIS DONE BEFORE' CHECKS" )
     
     logging.error( generate_centered_padded_string(" Plex Media Tagger Started ") )
     

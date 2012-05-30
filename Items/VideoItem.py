@@ -35,9 +35,11 @@ class VideoItem(BaseItem):
         return "Generic Name"
     #end def name
     
-    def create_new_comment_tag_contents(self):        
-        rating = int( float(self.rating) * 10 )
-        rating_str = "%s%s%i" % (DataTokens.itunes_rating_token, DataTokens.token_delimiter, rating)
+    def itunes_rating(self):
+        return int( float(self.rating) * 10 )
+        
+    def create_new_comment_tag_contents(self):
+        rating_str = "%s%s%i" % (DataTokens.itunes_rating_token, DataTokens.token_delimiter, self.itunes_rating())
         play_count_str = DataTokens.itunes_playcount_token + DataTokens.token_delimiter + self.view_count
         updated_at_str = DataTokens.updated_at_token + DataTokens.token_delimiter + self.updated_at
         

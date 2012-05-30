@@ -298,7 +298,47 @@ class VideoItemProcessor:
             logging.error("artwork export not yet implemented...")
             #logging.warning("attempting to export artwork...")
         
-    #end export_resources
+    #end def export_resources
+    
+    def add_to_itunes(self, part_item):
+        if self.video_item.__class__.__name__ == "MovieItem":
+            itunes_playlist = "Movies"
+        else:
+            itunes_playlist = "TV Shows"
+        
+        item_title = self.video_item.title
+        actionable_file_path = part_item.modified_file_path()
+        
+        search_string = 'set currentItems to search playlist "%s" for "%s" only displayed' % (itunes_playlist, item_title)
+        does_item_exist_command = ["osascript", '-e', 'tell application "iTunes"', '-e', 'try' ,'-e', search_string, '-e', 'set currentItem to item 1 of currentItems', '-e', 'set loc to (location of currentItem)', '-e', 'POSIX path of loc', '-e', 'end try', '-e', 'end tell']
+        if not self.opts.force:
+            logging.warning("Finding '%s' in iTunes..." % actionable_file_path)
+            result = subprocess.Popen(does_item_exist_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0].rstrip()
+        
+            if result == actionable_file_path:
+                logging.warning("  Already added to iTunes")
+                return
+            #end if result == actionable_file_path:
+        #end if not self.opts.force
+        
+        logging.warning("  Adding to iTunes...")
+        file_str = 'set p to (POSIX file "%s")' % actionable_file_path
+        add_to_playlist_str = 'add p to playlist "%s"' % itunes_playlist
+        add_to_itunes_command = ['osascript', '-e', 'try', '-e', file_str, '-e', 'tell application "iTunes"', '-e', add_to_playlist_str, '-e', 'end tell', '-e', 'end try']
+        result = subprocess.Popen(add_to_itunes_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0].rstrip()
+        if result.startswith("file track id"):
+            Summary().add_to_itunes_succeeded()
+            logging.warning("    Adding additional metadata to item in iTunes...")
+            current_item_str = 'tell %s' % result
+            set_rating_str = 'set rating to %i as integer' % self.video_item.itunes_rating()
+            set_play_count_str = 'set played count to %s as integer' % self.video_item.view_count
+            add_to_itunes_command = ['osascript', '-e', 'try', '-e', 'tell application "iTunes"', '-e', current_item_str, '-e', set_play_count_str, '-e', set_rating_str, '-e', 'end tell', '-e', 'end tell', '-e', 'end try']
+            subprocess.call(add_to_itunes_command)
+        else:
+            Summary().add_to_itunes_failed()
+            logging.critical("Failed 'add to iTunes' for '%s'. Incorrect path or not a compatible file type?" % (actionable_file_path) )
+        #end if result.startswith
+    #end def add_to_itunes
     
     def process(self):
         skipped_all = True
@@ -331,6 +371,10 @@ class VideoItemProcessor:
                     skipped_all = no_action = False
                     self.export_resources(part_item)
                 #end if export_resouces
+                if self.opts.add_to_itunes:
+                    skipped_all = no_action = False
+                    self.add_to_itunes(part_item)
+                #end if add_to_itunes
                 if self.opts.open_file_location and not no_action:
                     logging.warning("opening '%s'..." % part_item.modified_file_path())
                     command = ['open', "-R", part_item.modified_file_path()]

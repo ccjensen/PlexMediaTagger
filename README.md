@@ -47,8 +47,9 @@ Options:
                        when tagging tv show episodes, the season artwork will  
                        be used instead of the episode thumbnail  
  `-r, --remove-tags`   remove all compatible tags from the files  
- `-f, --force`         ignore previous work and steam ahead with task (will  
-                       re-tag previously tagged files, etc.)  
+ `-f, --force`         ignore previous work and steam ahead with task (will
+                       re-tag previously tagged files, re-enters data into
+                       iTunes, etc.)  
  `-o, --optimize`      interleave the audio and video samples, and put the  
                        "MooV" atom at the beginning of the file  
  `--subtitles`         export any subtitles to the same path as the video  
@@ -64,6 +65,7 @@ Options:
                        (operations are performed in order supplied).  
   `--open`             open a Finder window at the containing folder of the  
                        file just processed (Mac OS X only)  
+  `--add-to-itunes`    adds the item to iTunes if not already present
  `-i IP, --ip=IP`      specify an alternate IP address that hosts a PMS to  
                        connect to (default is localhost)  
  `-p PORT, --port=PORT`specify an alternate port number to use when  

@@ -24,6 +24,8 @@ class Summary:
             self.metadata_embedded_fail = 0
             self.metadata_optimized_success = 0
             self.metadata_optimized_fail = 0
+            self.added_to_itunes_success = 0
+            self.added_to_itunes_fail = 0
             self.subtitle_export_success = 0
             self.subtitle_export_fail = 0
             self.artwork_export_success = 0
@@ -44,6 +46,10 @@ class Summary:
         total_items = self.metadata_optimized_success+self.metadata_optimized_fail
         if total_items > 0:
             results.append("Metadata optimized: \t\t%d, \tFailed: %d, \tTotal: %d" % ( self.metadata_optimized_success, self.metadata_optimized_fail, total_items ))
+            
+        total_items = self.added_to_itunes_success+self.added_to_itunes_fail
+        if total_items > 0:
+            results.append("Added to iTunes: \t\t%d, \tFailed: %d, \tTotal: %d" % ( self.added_to_itunes_success, self.added_to_itunes_fail, total_items ))
         
         total_items = self.subtitle_export_success+self.subtitle_export_success
         if total_items > 0:
@@ -79,6 +85,12 @@ class Summary:
 
     def metadata_optimized_failed(self):
         self.metadata_optimized_fail += 1
+        
+    def add_to_itunes_succeeded(self):
+        self.added_to_itunes_success += 1
+
+    def add_to_itunes_failed(self):
+        self.added_to_itunes_fail += 1
         
     def subtitle_export_succeeded(self):
         self.subtitle_export_success += 1
