@@ -14,6 +14,7 @@ import subprocess
 from Summary import *
 from LibraryStatistics import *
 from DataTokens import *
+from unicodedata import normalize
 
 class VideoItemProcessor:
     """docstring for VideoItemProcessor"""
@@ -321,7 +322,8 @@ class VideoItemProcessor:
             result_file_paths = result_string.split(delimiter)
             logging.debug("Find results in iTunes: %s" % result_file_paths)
             for file_path in result_file_paths:
-                if file_path == actionable_file_path:
+                unicode_filepath = normalize('NFC', file_path.decode('utf-8'))
+                if unicode_filepath == actionable_file_path:
                     logging.warning("  Already added to iTunes")
                     return
                 #end if result == actionable_file_path:

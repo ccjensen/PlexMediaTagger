@@ -9,6 +9,7 @@
 from BaseItem import *
 from StreamItem import *
 from urllib2 import unquote
+from unicodedata import normalize
 
 class PartItem(BaseItem):
     """docstring for PartItem"""
@@ -19,7 +20,7 @@ class PartItem(BaseItem):
         self.part_element = part_element
         
         file_path = self.part_element.attrib['file']
-        self.file_path = unquote(file_path).decode('utf-8')
+        self.file_path = normalize('NFC', unquote(file_path).decode('utf-8'))
         self.file_type = os.path.splitext(self.file_path)[1]
         self.duration = self.part_element.get('duration', "")
         self.size = self.part_element.attrib['size']
