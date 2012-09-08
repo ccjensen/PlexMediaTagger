@@ -31,7 +31,7 @@ Note: __Embedding metadata in files only works on OS X__, as it uses a tool that
 		Example 6: plexmediatagger.py -tb --batch-breadcrumb='tv>weeds>>goat'
 			only tag items who are in a section who's title contains 'tv', where the movie or show name contains 'weeds', any season and episode title contains 'goat'
 
-The tool uses the comment metadata field to store metadata that does not have its own tag, but is a value that iTunes stores in its internal database (such as rating and playcount). There is an iTunes script in the extra's folder that can load this information into iTunes. So after the tools has run and embedded the information, select the corresponding file in iTunes and run the script. This will load in that extra information that cannot be embedded.
+The tool uses the comment metadata field to store metadata that does not have its own tag, but is a value that iTunes stores in its internal database (such as rating and playcount). There is an iTunes script in the extra's folder that can load this information into iTunes, or you can try using the `--add-to-itunes` flag that will make sure the item being processed isn't already present in iTunes and it will add in the extra metadata for you. If you do want to do this step manually, add the newly tagged file to iTunes and select the corresponding entry in iTunes and run the script. This will load in that extra information that cannot be embedded directly.
 
 Note: Filepaths to media items in PMS need to be the same as on machine that is running this script (can be worked around by using the -m option to modify the file path).
 
