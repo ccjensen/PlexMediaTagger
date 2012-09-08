@@ -16,7 +16,7 @@ Either:
 
 The tool requires python (pre-installed on most versions of Mac OS X and linux). I have tested it with [Python v2.7.2 for windows](http://python.org/getit/releases/2.7.2/). If you want pretty colors for the output, you might also have to download and install the [ctypes module](http://python.net/crew/theller/ctypes/) for python (it says it's included, but didn't seem to be with v2.7.2).
 
-Note: Embedding metadata in files only works on OS X, as it uses a tool that unforuntately only is available for that system. Exporting of resources (subtitles, artwork, etc) and statistics gathering should work fine on both unix and windows.
+Note: __Embedding metadata in files only works on OS X__, as it uses a tool that unforuntately only is available for that system. Exporting of resources (subtitles, artwork, etc) and statistics gathering should work fine on both unix, linux and windows.
 
 ## Usage: 
 
