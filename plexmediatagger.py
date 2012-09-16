@@ -149,7 +149,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     elif opts.removetags:
         logging.critical( "WARNING, TAGS WILL BE REMOVED PERMANENTLY" )
     elif opts.force:
-        logging.critical( "FORCE MODE ENABLED. THIS WILL BYPASS ANY 'HAS THIS DONE BEFORE' CHECKS" )
+        logging.critical( "FORCE MODE ENABLED. THIS WILL BYPASS ANY 'HAS THIS BEEN DONE BEFORE' CHECKS" )
     
     logging.error( generate_centered_padded_string(" Plex Media Tagger Started ") )
     
