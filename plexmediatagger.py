@@ -135,7 +135,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
         parser.error("Cannot use batch filtering options when batch mode is not active...")
     
     if len(opts.batch_breadcrumb) > 0:
-        opts.batch_breadcrumb = opts.batch_breadcrumb.split(">")
+        opts.batch_breadcrumb = opts.batch_breadcrumb.lower().split(">")
         opts.batch_breadcrumb.reverse()
     
     if opts.quiet:

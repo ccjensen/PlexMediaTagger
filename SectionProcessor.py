@@ -79,7 +79,7 @@ class SectionProcessor:
         list_of_items_without_containers = []
         #filter the list
         for item in list_of_items:
-            if not breadcrumb.lower() in item.title.lower():
+            if not breadcrumb in item.title.lower():
                 logging.info( " Disregarding '%s' because it does not match breadcrumb '%s'" % (item.title, breadcrumb) )
                 continue
             if item.title != "All episodes":
