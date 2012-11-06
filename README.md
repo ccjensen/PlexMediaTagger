@@ -57,7 +57,7 @@ Options:
                        file  
  `--embed-subtitles`   embed compatible files with a compatible "sidecar"  
                        subtitle file if present  
- `--artwork`           export the artwork to the same path as the video file  
+ `--export-artwork`    export the artwork to the same path as the video file  
   `--stats`            gather "interesting" statistics about the items being  
                        processed  
  `-m <find> <replace>` perform a find & replace operation on the pms' media  
