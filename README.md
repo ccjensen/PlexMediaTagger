@@ -22,7 +22,7 @@ Note: __Embedding metadata in files only works on OS X__, as it uses a tool that
 
 		Usage: plexmediatagger.py [options]
 		Example 1: plexmediatagger.py --tag
-		Example 2: plexmediatagger.py -bq --tag --remove-all-tags --optimize -e subtitles -ip 192.168.0.2 --port 55400
+		Example 2: plexmediatagger.py -bq --tag --remove-all-tags --optimize --export-subtitles --embed-subtitles -ip 192.168.0.2 --port 55400
 		Example 3: plexmediatagger.py --subtitles -m 'D:\Movies' '/Volumes/Media/Movies' -m '\' '/'
 		Example 4: plexmediatagger.py -tb --batch-mediatype=movie --batch-breadcrumb='kids>cars'
 			only tag movies who are in a section containing the word 'kids' and movies who's name contains 'cars'
@@ -52,8 +52,11 @@ Options:
                        iTunes, etc.)  
  `-o, --optimize`      interleave the audio and video samples, and put the  
                        "MooV" atom at the beginning of the file  
- `--subtitles`         export any subtitles to the same path as the video  
+ `--chapter-previews`  generate preview images for any chapter markers  
+ `--export-subtitles`  export any subtitles to the same path as the video  
                        file  
+ `--embed-subtitles`   embed compatible files with a compatible "sidecar"  
+                       subtitle file if present  
  `--artwork`           export the artwork to the same path as the video file  
   `--stats`            gather "interesting" statistics about the items being  
                        processed  

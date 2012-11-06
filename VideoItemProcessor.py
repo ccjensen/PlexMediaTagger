@@ -140,6 +140,7 @@ class VideoItemProcessor:
     def remove_tags(self, part_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         filepath = part_item.modified_file_path()
+        
         #removal of artwork doesn't seem to work
         all_tags = ["{Artwork:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}"]#these are currently not supported in subler cli tool, "{XID:}", "{iTunes Account:}", "{Sort Name:}", "{Sort Artist:}", "{Sort Album Artist:}", "{Sort Album:}", "{Sort Composer:}", "{Sort TV Show:}"]
         
@@ -171,6 +172,9 @@ class VideoItemProcessor:
     def tag(self, part_item):
         SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         filepath = part_item.modified_file_path()
+        directory = os.path.dirname(filepath)
+        filename = os.path.basename(filepath)
+        filename_without_extension = os.path.splitext(filename)[0]
         
         logging.warning("tagging...")
         
@@ -183,6 +187,20 @@ class VideoItemProcessor:
         else:
             action_description = "Tags added"
         #end if optimize
+        
+        if self.opts.embed_subtitles:
+            action_description += ", and any subtitles embedded"
+            compatible_sidecar_subtitles = self.get_all_sidecar_subtitles(directory, filename_without_extension, codec='srt')
+            if len(compatible_sidecar_subtitles) == 0:
+                logging.warning("Found no 'srt' subtitle files to embed...")
+            else:
+                for sub in compatible_sidecar_subtitles:
+                    tag_cmd.append("-s")
+                    tag_cmd.append(os.path.join(directory, sub))
+                
+        if self.opts.chapter_previews:
+            action_description += ", and chapter previews generated"
+            tag_cmd.append("-p")
 
         tag_cmd.append("-t")
         tag_cmd.append(part_item.tag_string()) #also downloads the artwork
@@ -223,15 +241,6 @@ class VideoItemProcessor:
         directory = os.path.dirname(part_item_file_path)
         filename = os.path.basename(part_item_file_path)
         filename_without_extension = os.path.splitext(filename)[0]
-        
-        try:
-            os.chdir(directory)
-        except OSError as (errorstr):
-#            OSError: [Errno 2] No such file or directory: '/Volumes/Drobo/aaa'
-            logging.critical("Failed 'resource export': %s" % (errorstr) )
-            logging.critical('Do you have any "yellow exclamation marks" in the Plex Media Manager?')
-            return False
-        #end try
             
         #=== subtitles ===
         #build up language_code dict
@@ -266,8 +275,8 @@ class VideoItemProcessor:
                     language_code = key[0]
                     codec = key[1]
                     #get all existing sub files. example filename: Sopranos - S01E01 - The Pilot*.eng.srt
-                    glob_str = "%s*.%s.%s" % (filename_without_extension, language_code, codec)
-                    if len(glob.glob(glob_str)) > 0:
+                    compatible_sidecar_subtitles = self.get_all_sidecar_subtitles(directory, filename_without_extension, language_code, codec)
+                    if len(compatible_sidecar_subtitles) > 0:
                         logging.warning("Subtitle file(s) with language code '%s' of type '%s' already exist. Skipping all matching..." % (language_code, codec))
                         continue
                     #end if
@@ -300,6 +309,25 @@ class VideoItemProcessor:
             #logging.warning("attempting to export artwork...")
         
     #end def export_resources
+    
+    def get_all_sidecar_subtitles(self, directory, filename_without_extension, language_code=None, codec=None):
+        #get all existing sub files. example filename: Sopranos - S01E01 - The Pilot*.eng.srt
+        current_directory = os.getcwd()
+        try:
+            os.chdir(directory)
+        except OSError as (errorstr):
+            logging.critical("Failed 'resource export': %s" % (errorstr) )
+            logging.critical('Do you have any "yellow exclamation marks" in the Plex Media Manager?')
+            return False
+        #end try
+        glob_str = "%s*" % (filename_without_extension)
+        if language_code:
+            glob_str += ".%s" % (language_code)
+        if codec:
+            glob_str += ".%s" % (codec)
+        subs = glob.glob(glob_str)
+        os.chdir(current_directory)
+        return subs
     
     def add_to_itunes(self, part_item):
         if self.video_item.__class__.__name__ == "MovieItem":

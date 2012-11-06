@@ -48,7 +48,7 @@ def main():
     parser = OptionParser(usage="\
 %prog [options]\n\
 Example 1: %prog --tag\n\
-Example 2: %prog -bq --tag --remove-all-tags --optimize -e subtitles -ip 192.168.0.2 --port 55400\n\
+Example 2: %prog -bq --tag --remove-all-tags --optimize --export-subtitles --embed-subtitles -ip 192.168.0.2 --port 55400\n\
 Example 3: %prog --subtitles -m 'D:\Movies' '/Volumes/Media/Movies' -m '\\' '/'\n\
 Example 4: %prog -tb --batch-mediatype=movie --batch-breadcrumb='kids>cars'\n\
 \tonly tag movies who are in a section containing the word 'kids' and movies who's name contains 'cars'\n\
@@ -70,11 +70,18 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="remove all compatible tags from the files")
     parser.add_option(  "-f", "--force", action="store_true", dest="force",
                         help="ignore previous work and steam ahead with task (will re-tag previously tagged files, re-enters data into iTunes, etc.)")
+                        
     parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
                         help="interleave the audio and video samples, and put the \"MooV\" atom at the beginning of the file")
-    parser.add_option(  "--subtitles", action="store_true", dest="export_subtitles",
+    parser.add_option(  "--chapter-previews", action="store_true", dest="chapter_previews",
+                        help="generate preview images for any chapter markers")
+                        
+    parser.add_option(  "--export-subtitles", action="store_true", dest="export_subtitles",
                         help="export any subtitles to the same path as the video file")
-    parser.add_option(  "--artwork", action="store_true", dest="export_artwork",
+    parser.add_option(  "--embed-subtitles", action="store_true", dest="embed_subtitles",
+                        help="embed compatible files with a compatible \"sidecar\" subtitle file if present")
+                        
+    parser.add_option(  "--export-artwork", action="store_true", dest="export_artwork",
                         help="export the artwork to the same path as the video file")
     parser.add_option(  "--stats", action="store_true", dest="gather_statistics",
                         help="gather \"interesting\" statistics about the items being processed")
@@ -108,7 +115,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="pretend to do the job, but never actually change or export anything. Pretends that all tasks succeed. Useful for testing purposes")
 
     parser.set_defaults( tag=False, tag_update=False, tag_prefer_season_artwork=False, remove_tags=False, 
-                        optimize=False, export_resources=False, export_subtitles=False, export_artwork=False, 
+                        optimize=False, chapter_previews=False, embed_subtitles=False,
+                        export_resources=False, export_subtitles=False, export_artwork=False, 
                         gather_statistics=False, open_file_location=False, add_to_itunes=False,
                         force_tagging=False, dryrun=False,
                         interactive=True, quiet=False, batch_mediatype="any", batch_breadcrumb="",
@@ -127,6 +135,12 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     if opts.tag_prefer_season_artwork and not opts.tag:
         parser.error("Cannot prefer season artwork when not tagging...")
+        
+    if opts.chapter_previews and not opts.tag:
+        parser.error("Cannot generate chapter previews when not tagging...")
+        
+    if opts.embed_subtitles and not opts.tag:
+        parser.error("Cannot embed subtitles when not tagging...")
         
     if opts.tag_update and not opts.tag:
         parser.error("Cannot update tags when not tagging...")
