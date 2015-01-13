@@ -138,7 +138,7 @@ class VideoItemProcessor:
     #end def execute_command
     
     def remove_tags(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v019")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
         filepath = part_item.modified_file_path()
         
        
@@ -167,7 +167,7 @@ class VideoItemProcessor:
     #end remove_tags
     
     def tag(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v019")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
         filepath = part_item.modified_file_path()
         directory = os.path.dirname(filepath)
         filename = os.path.basename(filepath)
@@ -213,7 +213,7 @@ class VideoItemProcessor:
     #end tag
     
     def optimize(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v019")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
         filepath = part_item.modified_file_path()
         
         logging.warning("optimizing file...")
