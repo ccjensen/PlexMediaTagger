@@ -3,7 +3,7 @@ Tested on Mac OS X 10.10.1 (Yosemite)
 
 thanks goes to:  
 the [Plex team](http://www.plexapp.com), their PMS takes care of all the hard work of gathering the metadata and providing an intuitive web API to browse the local library.  
-the [Subler team](http://code.google.com/p/subler/), their CLI tool takes care of the actual embedding and reading of the information.  
+the [Subler team](https://bitbucket.org/galad87/subler), their [CLI tool](https://bitbucket.org/galad87/sublercli) takes care of the actual embedding and reading of the information.  
 
 ## Installation:
 Either:  
