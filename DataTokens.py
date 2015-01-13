@@ -13,5 +13,5 @@ class DataTokens:
     itunes_rating_token = "R"
     itunes_playcount_token = "PC"
     updated_at_token = "D"
-    atomicparsely_comment_token = "Atom \"©cmt\" contains:"
+    subler_comment_token = "Comments:"
 #end class DataTokens

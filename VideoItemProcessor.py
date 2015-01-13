@@ -85,25 +85,26 @@ class VideoItemProcessor:
     
     def getFileCommentTagContents(self, part_item):
         """docstring for getFileCommentTagContents"""
-        AtomicParsley = os.path.join(sys.path[0], "AtomicParsley32")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
 
         #Create the command line string
-        get_tags_cmd = ['%s' % AtomicParsley]
+        get_tags_cmd = ['%s' % SublerCLI]
+        get_tags_cmd.append("-source")
         get_tags_cmd.append('%s' % part_item.modified_file_path())
-        get_tags_cmd.append('-t')
+        get_tags_cmd.append('-listmetadata')
         
         #check if file has already been tagged
         result = subprocess.Popen(get_tags_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
         
         #error checking
-        if 'AtomicParsley error' in result:
+        if "Error" in result:
             logging.critical("Failed to determine file tagged status")
             return nil
-        #end if 'AtomicParsley error' in result:
+        #end if "Error" in result:
         
         for line in result.split("\n"):
-            if DataTokens.atomicparsely_comment_token in line:
-                return line.replace(DataTokens.atomicparsely_comment_token, '')
+            if DataTokens.subler_comment_token in line:
+                return line.replace(DataTokens.subler_comment_token, '')
 
         logging.info("File untagged")
         return ""
