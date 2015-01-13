@@ -258,8 +258,12 @@ def setLogLevel(*args, **kwargs):
 
 
 def signal_handler(signal, frame):
-    section_processor.abort = True
-    logging.critical( "\rPerforming safe abort..." )
+    if not section_processor.abort:
+        section_processor.abort = True
+        logging.critical( "\rPerforming safe abort... (ctrl+c again to exit immediately)" )
+    else:
+        logging.critical( "\rAborting immediately..." )
+        sys.exit(0)
 #end signal_handler
 
 def abort():
