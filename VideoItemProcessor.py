@@ -153,7 +153,7 @@ class VideoItemProcessor:
         else:
             action_description = "Tags removed"
         #end if optimize
-        
+
         tag_removal_cmd.append("-removemetadata")
         tag_removal_cmd.append("-dest")
         tag_removal_cmd.append(filepath)
@@ -231,7 +231,7 @@ class VideoItemProcessor:
         else:
             Summary().metadata_optimized_failed()
         #end success
-    #end remove_tags
+    #end optimize
     
     def export_resources(self, part_item):
         part_item_file_path = part_item.modified_file_path()
