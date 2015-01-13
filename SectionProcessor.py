@@ -148,7 +148,6 @@ class SectionProcessor:
             full_movie_item = MovieItem(self.opts, partial_movie_media_container)
             logging.warning( generate_right_padded_string("processing %d/%d %ss : %s " % (index+1, len(selected_movie_items), contents_type, full_movie_item.name()), "-") )
             threading.Thread(None, self.process_video(full_movie_item)).start()
-            time.sleep(1)
             self.event.wait()
         #end enumerate(selected_movies)
     #end process_movie_section
@@ -196,7 +195,6 @@ class SectionProcessor:
             full_episode_item = EpisodeItem(self.opts, partial_episode_media_container, season)
             logging.warning( generate_right_padded_string("processing %d/%d %ss : %s " % (index+1, len(selected_episode_items), contents_type, full_episode_item.name()), "-") )
             threading.Thread(None, self.process_video(full_episode_item)).start()
-            time.sleep(1)
             self.event.wait()
         #end enumerate(selected_episodes)
     #end process_episode_section
