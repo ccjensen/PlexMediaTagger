@@ -97,6 +97,11 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="specify an alternate IP address that hosts a PMS to connect to (default is localhost)")
     parser.add_option(  "-p", "--port", action="store", dest="port", type="int",
                         help="specify an alternate port number to use when connecting to the PMS (default is 32400)")
+                        
+    parser.add_option(  "--username", action="store", dest="username", type="string",
+                        help="specify the username to use when authenticating with the PMS (default is no authentication)")
+    parser.add_option(  "--password", action="store", dest="password", type="string",
+                        help="specify the password to use when authenticating with the PMS (default is no authentication)")
     
     parser.add_option(  "--interactive", action="store_true", dest="interactive",
                         help="interactivly select files to operate on [default]")
@@ -120,7 +125,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         gather_statistics=False, open_file_location=False, add_to_itunes=False,
                         force_tagging=False, dryrun=False,
                         interactive=True, quiet=False, batch_mediatype="any", batch_breadcrumb="",
-                        ip="localhost", port=32400, path_modifications=[])
+                        ip="localhost", port=32400, username="", password="",
+                        path_modifications=[])
     
     try:
         opts, args = parser.parse_args()
@@ -147,6 +153,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     if opts.interactive and ( opts.batch_mediatype != "any" or len(opts.batch_breadcrumb) > 0):
         parser.error("Cannot use batch filtering options when batch mode is not active...")
+        
+    if (len(opts.username) > 0 and not len(opts.password) > 0) or (len(opts.password) > 0 and not len(opts.username) > 0):
+        parser.error("Must supply both username and password when using authentication to connect to PMS...")
     
     if len(opts.batch_breadcrumb) > 0:
         opts.batch_breadcrumb = opts.batch_breadcrumb.lower().split(">")
@@ -173,6 +182,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     request_handler = PmsRequestHandler()
     request_handler.ip = opts.ip
     request_handler.port = opts.port
+    request_handler.setup_opener(opts.username, opts.password)
     
     global section_processor
     section_processor = SectionProcessor(opts, request_handler)
