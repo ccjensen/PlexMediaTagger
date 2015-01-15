@@ -37,8 +37,10 @@ class PmsRequestHandler(Singleton):
             password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
             password_manager.add_password(None, sign_in_url, username, password)
             auth_handler = urllib2.HTTPBasicAuthHandler(password_manager)
+            self.opener = urllib2.build_opener(auth_handler)
+        else:
+            self.opener = urllib2.build_opener()
         #end if len(username)
-        self.opener = urllib2.build_opener(auth_handler)
         self.opener.addheaders = [("X-Plex-Client-Identifier", "PlexMediaTagger")]
         urllib2.install_opener(self.opener)
         if should_sign_in:

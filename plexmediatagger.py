@@ -12,11 +12,12 @@ Automatically tags compatible media items.
 Uses data from the PlexMediaServer (http://www.plexapp.com/)
 
 thanks goes to:
-the Subler team (http://code.google.com/p/subler/) for their excellent CLI tool to used to write the information to the media files
+the Subler team (https://bitbucket.org/galad87/subler https://bitbucket.org/galad87/sublercli) for 
+their excellent CLI tool to used to write the information to the media files
 """
 
 __author__ = "ccjensen/Chris"
-__version__ = "0.5"
+__version__ = "0.7"
 
 import sys
 import os
@@ -25,6 +26,7 @@ import unicodedata
 import signal
 import logging
 import threading
+import getpass
 
 from xml.etree import ElementTree
 from optparse import OptionParser, OptionValueError
@@ -48,13 +50,15 @@ def main():
     parser = OptionParser(usage="\
 %prog [options]\n\
 Example 1: %prog --tag\n\
-Example 2: %prog -bq --tag --remove-all-tags --optimize --export-subtitles --embed-subtitles -ip 192.168.0.2 --port 55400\n\
-Example 3: %prog --subtitles -m 'D:\Movies' '/Volumes/Media/Movies' -m '\\' '/'\n\
-Example 4: %prog -tb --batch-mediatype=movie --batch-breadcrumb='kids>cars'\n\
+Example 2: %prog --tag -b --username='foo@bar.com' --interactive-password\n\
+\ttag everything in the library, and authenticate to Plex Home as user foo@bar.com with password being prompted for (password can also be supplied using the --password option)\n\
+Example 3: %prog -bq --tag --remove-all-tags --optimize --export-subtitles --embed-subtitles -ip 192.168.0.2 --port 55400\n\
+Example 4: %prog --subtitles -m 'D:\Movies' '/Volumes/Media/Movies' -m '\\' '/'\n\
+Example 5: %prog -tb --batch-mediatype=movie --batch-breadcrumb='kids>cars'\n\
 \tonly tag movies who are in a section containing the word 'kids' and movies who's name contains 'cars'\n\
-Example 5: %prog -tb --batch-mediatype=show --batch-breadcrumb='>lost>season 1>pilot'\n\
+Example 6: %prog -tb --batch-mediatype=show --batch-breadcrumb='>lost>season 1>pilot'\n\
 \tonly tag tv episodes, matches all sections, show name contains lost, season 1, episode title contains 'pilot'\n\
-Example 6: %prog -tb --batch-breadcrumb='tv>weeds>>goat'\n\
+Example 7: %prog -tb --batch-breadcrumb='tv>weeds>>goat'\n\
 \tonly tag items who are in a section who's title contains 'tv', where the movie or show name contains 'weeds', any season and episode title contains 'goat' \n\
 %prog -h for full list of options\n\n\
 Filepaths to media items in PMS need to be the same as on machine that is running this script (can be worked around by using the -m option to modify the file path).\
@@ -102,6 +106,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         help="specify the username to use when authenticating with the PMS (default is no authentication)")
     parser.add_option(  "--password", action="store", dest="password", type="string",
                         help="specify the password to use when authenticating with the PMS (default is no authentication)")
+    parser.add_option(  "--interactive-password", action="store_true", dest="interactive_password",
+                        help="the password to use when authenticating with the PMS will be supplied interactively")
     
     parser.add_option(  "--interactive", action="store_true", dest="interactive",
                         help="interactivly select files to operate on [default]")
@@ -125,7 +131,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
                         gather_statistics=False, open_file_location=False, add_to_itunes=False,
                         force_tagging=False, dryrun=False,
                         interactive=True, quiet=False, batch_mediatype="any", batch_breadcrumb="",
-                        ip="localhost", port=32400, username="", password="",
+                        ip="localhost", port=32400, username="", password="", interactive_password=False,
                         path_modifications=[])
     
     try:
@@ -153,6 +159,9 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     
     if opts.interactive and ( opts.batch_mediatype != "any" or len(opts.batch_breadcrumb) > 0):
         parser.error("Cannot use batch filtering options when batch mode is not active...")
+        
+    if opts.interactive_password:
+        opts.password = getpass.getpass("Password $")
         
     if (len(opts.username) > 0 and not len(opts.password) > 0) or (len(opts.password) > 0 and not len(opts.username) > 0):
         parser.error("Must supply both username and password when using authentication to connect to PMS...")
