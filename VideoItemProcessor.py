@@ -85,6 +85,7 @@ class VideoItemProcessor:
     
     def getFileCommentTagContents(self, part_item):
         """docstring for getFileCommentTagContents"""
+        # use latest subler as it can read metadata
         SublerCLI = os.path.join(sys.path[0], "SublerCLI")
 
         #Create the command line string
@@ -139,10 +140,11 @@ class VideoItemProcessor:
     #end def execute_command
     
     def remove_tags(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         filepath = part_item.modified_file_path()
         
-       
+        #removal of artwork doesn't seem to work
+        all_tags = ["{Artwork:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}"]#these are currently not supported in subler cli tool, "{XID:}", "{iTunes Account:}", "{Sort Name:}", "{Sort Artist:}", "{Sort Album Artist:}", "{Sort Album:}", "{Sort Composer:}", "{Sort TV Show:}"]
         logging.warning("removing tags...")
         
         #Create the command line command
@@ -150,13 +152,14 @@ class VideoItemProcessor:
         
         if self.opts.optimize:
             action_description = "Tags removed and optimized"
-            tag_removal_cmd.append("-optimize")
+            tag_removal_cmd.append("-O")
         else:
             action_description = "Tags removed"
         #end if optimize
 
-        tag_removal_cmd.append("-removemetadata")
-        tag_removal_cmd.append("-dest")
+        tag_removal_cmd.append("-t")
+        tag_removal_cmd.append("".join(all_tags))
+        tag_removal_cmd.append("-i")
         tag_removal_cmd.append(filepath)
         
         success = self.execute_command(filepath, tag_removal_cmd, action_description)
@@ -168,7 +171,7 @@ class VideoItemProcessor:
     #end remove_tags
     
     def tag(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         filepath = part_item.modified_file_path()
         directory = os.path.dirname(filepath)
         filename = os.path.basename(filepath)
@@ -181,7 +184,7 @@ class VideoItemProcessor:
 
         if self.opts.optimize:
             action_description = "Tags added and optimized"
-            tag_cmd.append("-optimize")
+            tag_cmd.append("-O")
         else:
             action_description = "Tags added"
         #end if optimize
@@ -193,16 +196,16 @@ class VideoItemProcessor:
                 logging.warning("Found no 'srt' subtitle files to embed...")
             else:
                 for sub in compatible_sidecar_subtitles:
-                    tag_cmd.append("-source")
+                    tag_cmd.append("-s")
                     tag_cmd.append(os.path.join(directory, sub))
                 
         if self.opts.chapter_previews:
             action_description += ", and chapter previews generated"
-            tag_cmd.append("-chapterspreview")
+            tag_cmd.append("-p")
 
-        tag_cmd.append("-metadata")
+        tag_cmd.append("-t")
         tag_cmd.append(part_item.tag_string()) #also downloads the artwork
-        tag_cmd.append("-dest")
+        tag_cmd.append("-i")
         tag_cmd.append(filepath)
         
         success = self.execute_command(filepath, tag_cmd, action_description)
@@ -214,7 +217,7 @@ class VideoItemProcessor:
     #end tag
     
     def optimize(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
         filepath = part_item.modified_file_path()
         
         logging.warning("optimizing file...")
@@ -222,8 +225,8 @@ class VideoItemProcessor:
         action_description = "Tags optimized"
         #Create the command line command
         optimize_cmd = ['%s' % SublerCLI]
-        optimize_cmd.append("-optimize")
-        optimize_cmd.append("-dest")
+        optimize_cmd.append("-O")
+        optimize_cmd.append("-i")
         optimize_cmd.append(filepath)
         
         success = self.execute_command(filepath, optimize_cmd, action_description)
