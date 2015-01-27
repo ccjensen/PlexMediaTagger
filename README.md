@@ -8,7 +8,7 @@ the [Subler team](https://bitbucket.org/galad87/subler), their [CLI tool](https:
 ## Installation:
 Either:  
 
- *  Download the project: [Zip of project](https://github.com/ccjensen/PlexMediaTagger/zipball/master)  
+ *  Download the project as a zip file (link is in the right pane of the [PlexMediaTagger GitHub](https://github.com/ccjensen/PlexMediaTagger) page)  
  *  or, if you think you might want to tweak the code, clone the repository::  
 
     		git clone git://github.com/ccjensen/PlexMediaTagger.git
