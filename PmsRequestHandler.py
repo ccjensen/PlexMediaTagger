@@ -102,9 +102,9 @@ class PmsRequestHandler(Singleton):
             f = urllib2.urlopen(transcoder_image_url)
             content_type = f.info()['Content-Type']
             if content_type == 'image/jpeg':
-                image_path = os.path.join(directory, item_name+".jpg")
+                image_path = os.path.join(directory, item_name+".jpg").replace("/", "-")
             elif content_type == 'image/png':
-                image_path = os.path.join(directory, item_name+".png")
+                image_path = os.path.join(directory, item_name+".png").replace("/", "-")
             else:
                 raise TypeError("Failed to download image: Unknown image mimetype [%s]", content_type)
             #end if
