@@ -88,7 +88,7 @@ class VideoItemProcessor:
     def getFileCommentTagContents(self, part_item):
         """docstring for getFileCommentTagContents"""
         # use latest subler as it can read metadata
-        metadata = MP4(part_item.modified_file_path())
+        #metadata = MP4(part_item.modified_file_path())
         
         #error checking
         if "Error" in result:
@@ -155,7 +155,7 @@ class VideoItemProcessor:
     #end remove_tags
     
     def tag(self, part_item):
-        
+
         metadata = MP4(part_item.modified_file_path())
         
         logging.warning("tagging...")
@@ -183,20 +183,45 @@ class VideoItemProcessor:
             
         tagString = part_item.tag_string()
         
+	#logging.warning(tagString)
+
         tags = tagString.replace("}", "}|")[:-1].split("|")
-        
-        coverFile = open(tags[1][9:-1], 'rb');
-        cover = MP4Cover(coverFile.read(), getattr(MP4Cover, 'FORMAT_PNG'))
-        coverFile.close()
-            
-        metadata['\xa9nam'] = tags[3][6:-1]
-        metadata['\xa9ART'] = tags[4][8:-1]
-        metadata['\xa9gen'] = tags[5][7:-1]
-        metadata['\xa9day'] = tags[6][14:-7]
-        metadata['\xa9lyr'] = tags[8][18:-1]
-        metadata['covr'] = [cover];
-        
-        metadata.save()
+
+	if tags[0][12:-1] == "movie":
+
+		coverFile = open(tags[1][9:-1], 'rb')
+	
+		cover = MP4Cover(coverFile.read(), getattr(MP4Cover, 'FORMAT_PNG'))
+		coverFile.close()
+	
+        	metadata['\xa9nam'] = tags[3][6:-1]
+        	metadata['\xa9ART'] = tags[4][8:-1]
+        	metadata['\xa9gen'] = tags[5][7:-1]
+        	metadata['\xa9day'] = tags[6][14:-7]
+        	metadata['ldes'] = tags[8][18:-1]
+		metadata['covr'] = [cover];
+		metadata['stik'] = str(unichr(9))
+		metadata.save()
+        else:
+		
+		coverFile = open(tags[7][9:-1], 'rb')
+		
+		cover = MP4Cover(coverFile.read(), getattr(MP4Cover, 'FORMAT_PNG'))
+		coverFile.close()
+		
+		metadata['\xa9nam'] = tags[12][6:-1]
+                metadata['\xa9ART'] = tags[20][10:-1]
+                metadata['\xa9gen'] = tags[3][7:-1]
+                metadata['\xa9day'] = tags[13][14:-7]
+                metadata['ldes'] = tags[18][18:-1]
+		metadata['\xa9gen'] = tags[3][7:-1]
+		metadata['tvsh'] = tags[4][9:-1]
+		metadata['tvsn'] = tags[10][11:-1]
+		metadata['tves'] = tags[15][14:-1]
+		metadata['tven'] = tags[16][15:-1]
+                metadata['covr'] = [cover];
+		metadata['stik'] = str(unichr(10))
+		metadata.save()
     #end tag
     
     def optimize(self, part_item):
@@ -222,8 +247,8 @@ class VideoItemProcessor:
     
     def export_resources(self, part_item):
         part_item_file_path = part_item.modified_file_path()
-        directory = os.path.dirname(part_item_file_path)
-        filename = os.path.basename(part_item_file_path)
+        directory = os.path.dirname(part_item_file_path).replace("/", "-")
+        filename = os.path.basename(part_item_file_path).replace("/", "-")
         filename_without_extension = os.path.splitext(filename)[0]
             
         #=== subtitles ===
@@ -381,6 +406,7 @@ class VideoItemProcessor:
                     skipped_all = no_action = False
                     self.remove_tags(part_item)
                 #end if removetags
+		
                 if self.opts.tag and self.canTag(part_item) and self.shouldTag(part_item):
                     skipped_all = no_action = False
                     self.tag(part_item)
