@@ -184,12 +184,17 @@ class VideoItemProcessor:
         tagString = part_item.tag_string()
         
         tags = tagString.replace("}", "}|")[:-1].split("|")
+        
+        coverFile = open(tags[1][9:-1], 'rb');
+        cover = MP4Cover(coverFile.read(), getattr(MP4Cover, 'FORMAT_PNG'))
+        coverFile.close()
             
-        metadata['\xa9nam'] = tags[3][5:-1]
-        metadata['\xa9ART'] = tags[4][9:-1]
+        metadata['\xa9nam'] = tags[3][6:-1]
+        metadata['\xa9ART'] = tags[4][8:-1]
         metadata['\xa9gen'] = tags[5][7:-1]
         metadata['\xa9day'] = tags[6][14:-7]
-        metadata['desc'] = tags[8][18:-1]
+        metadata['\xa9lyr'] = tags[8][18:-1]
+        metadata['covr'] = [cover];
         
         metadata.save()
     #end tag
