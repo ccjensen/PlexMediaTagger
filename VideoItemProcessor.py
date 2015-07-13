@@ -216,8 +216,9 @@ class VideoItemProcessor:
                 metadata['ldes'] = tags[18][18:-1]
 		metadata['\xa9gen'] = tags[3][7:-1]
 		metadata['tvsh'] = tags[4][9:-1]
-		metadata['tvsn'] = tags[10][11:-1]
-		metadata['tves'] = tags[15][14:-1]
+		logging.warning(int(tags[10][11:-1]))
+		metadata['tvsn'] = str(unichr(int(tags[10][11:-1])))
+		metadata['tves'] = str(unichr(int(tags[15][14:-1])))
 		metadata['tven'] = tags[16][15:-1]
                 metadata['covr'] = [cover];
 		metadata['stik'] = str(unichr(10))
