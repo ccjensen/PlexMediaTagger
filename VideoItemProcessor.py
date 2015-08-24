@@ -100,7 +100,7 @@ class VideoItemProcessor:
         #error checking
         if "Error" in result:
             logging.critical("Failed to determine file tagged status")
-            return nil
+            return ""
         #end if "Error" in result:
         
         for line in result.split("\n"):
