@@ -44,7 +44,7 @@ class PmsRequestHandler(Singleton):
         self.opener.addheaders = [("X-Plex-Client-Identifier", "PlexMediaTagger")]
         urllib2.install_opener(self.opener)
         if should_sign_in:
-            logging.error( "Authenticating user '%s' with plex.tv..." % username )
+            logging.error( "Authenticating user '%s' with plex.tv..." % username.decode('utf-8') )
             try:
                 xml = urllib2.urlopen(sign_in_url, post_data)
                 contents = ElementTree.parse(xml)
@@ -53,11 +53,11 @@ class PmsRequestHandler(Singleton):
                 sys.exit(1)
             except IOError, e:
                 logging.debug(e)
-                logging.critical("Could not connect to authenticate user '%s'" % username)
+                logging.critical("Could not connect to authenticate user '%s'" % username.decode('utf-8'))
                 sys.exit(1)
             #end try
             auth_token = contents.getroot().find("authentication-token").text
-            logging.error( "  Authenticated user '%s' with plex.tv" % username )
+            logging.error( "  Authenticated user '%s' with plex.tv" % username.decode('utf-8') )
             self.opener.addheaders = [("X-Plex-Token", auth_token)]
     
     def get_contents(self, url):
