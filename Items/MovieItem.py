@@ -92,7 +92,7 @@ class MovieItem(VideoItem):
         if self.local_image_path != "":
             tag_string += self.new_tag_string_entry("Cover Art", self.local_image_path)
 
-        tag_string += self.new_tag_string_entry("Media Kind", "Movie")
+        tag_string += self.new_tag_string_entry("Media Kind", "9") #9 == Movie
         tag_string += self.new_tag_string_entry("Name", self.title)
         tag_string += self.new_tag_string_entry("Artist", self.directors)
         tag_string += self.new_tag_string_entry("Genre", self.genre) #single genre

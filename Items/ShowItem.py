@@ -65,7 +65,7 @@ class ShowItem(BaseItem):
     
     def tag_string(self):
         tag_string = ""
-        tag_string += self.new_tag_string_entry("Media Kind", "TV Show")
+        tag_string += self.new_tag_string_entry("Media Kind", "10") #10 == TV Show
         tag_string += self.new_tag_string_entry("Artist", self.title)
         tag_string += self.new_tag_string_entry("Album Artist", self.title)
         
