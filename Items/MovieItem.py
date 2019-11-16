@@ -90,7 +90,7 @@ class MovieItem(VideoItem):
         if self.local_image_path == "":
             self.export_image_to_temporary_location()
         if self.local_image_path != "":
-            tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
+            tag_string += self.new_tag_string_entry("Cover Art", self.local_image_path)
 
         tag_string += self.new_tag_string_entry("Media Kind", "Movie")
         tag_string += self.new_tag_string_entry("Name", self.title)

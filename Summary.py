@@ -86,10 +86,10 @@ class Summary:
     def metadata_optimized_failed(self):
         self.metadata_optimized_fail += 1
         
-    def add_to_itunes_succeeded(self):
+    def  add_to_tv_succeeded(self):
         self.added_to_itunes_success += 1
 
-    def add_to_itunes_failed(self):
+    def add_to_tv_failed(self):
         self.added_to_itunes_fail += 1
         
     def subtitle_export_succeeded(self):

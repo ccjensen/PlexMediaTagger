@@ -17,7 +17,7 @@ their excellent CLI tool to used to write the information to the media files
 """
 
 __author__ = "ccjensen/Chris"
-__version__ = "0.7"
+__version__ = "0.8"
 
 import sys
 import os
@@ -73,7 +73,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "-r", "--remove-tags", action="store_true", dest="removetags",
                         help="remove all compatible tags from the files")
     parser.add_option(  "-f", "--force", action="store_true", dest="force",
-                        help="ignore previous work and steam ahead with task (will re-tag previously tagged files, re-enters data into iTunes, etc.)")
+                        help="ignore previous work and steam ahead with task (will re-tag previously tagged files, re-enters data into TV, etc.)")
                         
     parser.add_option(  "-o", "--optimize", action="store_true", dest="optimize",
                         help="interleave the audio and video samples, and put the \"MooV\" atom at the beginning of the file")
@@ -94,8 +94,8 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.add_option(  "--open", action="store_true", dest="open_file_location",
                         help="open a Finder window at the containing folder of the file just processed (Mac OS X only)")
 
-    parser.add_option(  "--add-to-itunes", action="store_true", dest="add_to_itunes",
-                        help="adds the item to iTunes if not already present")
+    parser.add_option(  "--add-to-tv", action="store_true", dest="add_to_tv",
+                        help="adds the item to TV if not already present")
                         
     parser.add_option(  "-i", "--ip", action="store", dest="ip", type="string",
                         help="specify an alternate IP address that hosts a PMS to connect to (default is localhost)")
@@ -128,7 +128,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     parser.set_defaults( tag=False, tag_update=False, tag_prefer_season_artwork=False, remove_tags=False, 
                         optimize=False, chapter_previews=False, embed_subtitles=False,
                         export_resources=False, export_subtitles=False, export_artwork=False, 
-                        gather_statistics=False, open_file_location=False, add_to_itunes=False,
+                        gather_statistics=False, open_file_location=False, add_to_tv=False,
                         force_tagging=False, dryrun=False,
                         interactive=True, quiet=False, batch_mediatype="any", batch_breadcrumb="",
                         ip="localhost", port=32400, username="", password="", interactive_password=False,
@@ -142,7 +142,7 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
     if opts.export_subtitles or opts.export_artwork:
         opts.export_resources = True
     
-    if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources and not opts.add_to_itunes and not opts.gather_statistics:
+    if not opts.tag and not opts.removetags and not opts.optimize and not opts.export_resources and not opts.add_to_tv and not opts.gather_statistics:
         parser.error("No task to perform. Our work here is done...")
     
     if opts.tag_prefer_season_artwork and not opts.tag:

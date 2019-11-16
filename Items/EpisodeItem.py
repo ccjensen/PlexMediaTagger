@@ -68,11 +68,11 @@ class EpisodeItem(VideoItem):
         tag_string = self.season.tag_string()
         tag_string += super(EpisodeItem, self).tag_string()
         
-        if not self.opts.tag_prefer_season_artwork or not "{Artwork:" in tag_string:
+        if not self.opts.tag_prefer_season_artwork or not "{Cover Art:" in tag_string:
             if self.local_image_path == "":
                 self.export_image_to_temporary_location()
             if self.local_image_path != "":
-                tag_string += self.new_tag_string_entry("Artwork", self.local_image_path)
+                tag_string += self.new_tag_string_entry("Cover Art", self.local_image_path)
         
         tag_string += self.new_tag_string_entry("Name", self.title)
         tag_string += self.new_tag_string_entry("Release Date", self.originally_available_at)

@@ -11,6 +11,7 @@ import sys
 import os
 import glob
 import subprocess
+import shutil
 from Summary import *
 from LibraryStatistics import *
 from DataTokens import *
@@ -140,11 +141,11 @@ class VideoItemProcessor:
     #end def execute_command
     
     def remove_tags(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
         filepath = part_item.modified_file_path()
         
         #removal of artwork doesn't seem to work
-        all_tags = ["{Artwork:}", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}"]#these are currently not supported in subler cli tool, "{XID:}", "{iTunes Account:}", "{Sort Name:}", "{Sort Artist:}", "{Sort Album Artist:}", "{Sort Album:}", "{Sort Composer:}", "{Sort TV Show:}"]
+        all_tags = ["Cover Art", "{HD Video:}", "{Gapless:}", "{Content Rating:}", "{Media Kind:}", "{Name:}", "{Artist:}", "{Album Artist:}", "{Album:}", "{Grouping:}", "{Composer:}", "{Comments:}", "{Genre:}", "{Release Date:}", "{Track #:}", "{Disk #:}", "{TV Show:}", "{TV Episode #:}", "{TV Network:}", "{TV Episode ID:}", "{TV Season:}", "{Description:}", "{Long Description:}", "{Rating:}", "{Rating Annotation:}", "{Studio:}", "{Cast:}", "{Director:}", "{Codirector:}", "{Producers:}", "{Screenwriters:}", "{Lyrics:}", "{Copyright:}", "{Encoding Tool:}", "{Encoded By:}", "{contentID:}"]#these are currently not supported in subler cli tool, "{XID:}", "{iTunes Account:}", "{Sort Name:}", "{Sort Artist:}", "{Sort Album Artist:}", "{Sort Album:}", "{Sort Composer:}", "{Sort TV Show:}"]
         logging.warning("removing tags...")
         
         #Create the command line command
@@ -152,14 +153,14 @@ class VideoItemProcessor:
         
         if self.opts.optimize:
             action_description = "Tags removed and optimized"
-            tag_removal_cmd.append("-O")
+            tag_removal_cmd.append("-optimize")
         else:
             action_description = "Tags removed"
         #end if optimize
 
-        tag_removal_cmd.append("-t")
+        tag_removal_cmd.append("-metadata")
         tag_removal_cmd.append("".join(all_tags))
-        tag_removal_cmd.append("-i")
+        tag_removal_cmd.append("-source")
         tag_removal_cmd.append(filepath)
         
         success = self.execute_command(filepath, tag_removal_cmd, action_description)
@@ -171,7 +172,7 @@ class VideoItemProcessor:
     #end remove_tags
     
     def tag(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
         filepath = part_item.modified_file_path()
         directory = os.path.dirname(filepath)
         filename = os.path.basename(filepath)
@@ -184,7 +185,7 @@ class VideoItemProcessor:
 
         if self.opts.optimize:
             action_description = "Tags added and optimized"
-            tag_cmd.append("-O")
+            tag_cmd.append("-optimize")
         else:
             action_description = "Tags added"
         #end if optimize
@@ -203,21 +204,28 @@ class VideoItemProcessor:
             action_description += ", and chapter previews generated"
             tag_cmd.append("-p")
 
-        tag_cmd.append("-t")
+        tag_cmd.append("-metadata")
         tag_cmd.append(part_item.tag_string()) #also downloads the artwork
-        tag_cmd.append("-i")
+        tag_cmd.append("-source")
         tag_cmd.append(filepath)
+        tag_cmd.append("-destination")
+        tmp_filepath = filepath+"_tmp"
+        tag_cmd.append(tmp_filepath)
         
         success = self.execute_command(filepath, tag_cmd, action_description)
         if success:
             Summary().metadata_embedded_succeeded()
+            logging.info("Replacing old file with tagged one...")
+            shutil.move(tmp_filepath, filepath)
         else:
             Summary().metadata_embedded_failed()
+            logging.info("Cleaning up temporary file...")
+            os.unlink(tmp_filepath)
         #end success
     #end tag
     
     def optimize(self, part_item):
-        SublerCLI = os.path.join(sys.path[0], "SublerCLI-v010")
+        SublerCLI = os.path.join(sys.path[0], "SublerCLI")
         filepath = part_item.modified_file_path()
         
         logging.warning("optimizing file...")
@@ -225,8 +233,8 @@ class VideoItemProcessor:
         action_description = "Tags optimized"
         #Create the command line command
         optimize_cmd = ['%s' % SublerCLI]
-        optimize_cmd.append("-O")
-        optimize_cmd.append("-i")
+        optimize_cmd.append("-optimize")
+        optimize_cmd.append("-source")
         optimize_cmd.append(filepath)
         
         success = self.execute_command(filepath, optimize_cmd, action_description)
@@ -330,55 +338,55 @@ class VideoItemProcessor:
         os.chdir(current_directory)
         return subs
     
-    def add_to_itunes(self, part_item):
+    def add_to_tv(self, part_item):
         if self.video_item.__class__.__name__ == "MovieItem":
-            itunes_playlist = "Movies"
+            tv_playlist = "Movies"
         else:
-            itunes_playlist = "TV Shows"
+            tv_playlist = "TV Shows"
         
         item_title = self.video_item.title
         actionable_file_path = part_item.modified_file_path()
         
         if not self.opts.force:
-            logging.warning("Finding '%s' in iTunes..." % actionable_file_path)
+            logging.warning("Finding '%s' in TV..." % actionable_file_path)
             
-            search_string = 'set currentItems to search playlist "%s" for "%s" only displayed' % (itunes_playlist, item_title)
+            search_string = 'set currentItems to search playlist "%s" for "%s" only displayed' % (tv_playlist, item_title)
             delimiter = "###"
             result_creation_string = 'set output to output & "%s"' % delimiter
-            does_item_exist_command = ["osascript", '-e', 'tell application "iTunes"', '-e', 'try' ,'-e', search_string, '-e', 'set output to ""', '-e', 'repeat with currentItem in currentItems', '-e', 'set loc to (location of currentItem)', '-e', 'if output is not equal to "" then', '-e', result_creation_string, '-e', 'end if', '-e', 'set output to output & POSIX path of loc', '-e', 'end repeat', '-e', 'output', '-e', 'end try', '-e', 'end tell']
-            logging.debug("'find in iTunes' script: %s" % (does_item_exist_command))
+            does_item_exist_command = ["osascript", '-e', 'tell application "TV"', '-e', 'try' ,'-e', search_string, '-e', 'set output to ""', '-e', 'repeat with currentItem in currentItems', '-e', 'set loc to (location of currentItem)', '-e', 'if output is not equal to "" then', '-e', result_creation_string, '-e', 'end if', '-e', 'set output to output & POSIX path of loc', '-e', 'end repeat', '-e', 'output', '-e', 'end try', '-e', 'end tell']
+            logging.debug("'find in TV' script: %s" % (does_item_exist_command))
             result_string = subprocess.Popen(does_item_exist_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0].rstrip()
             result_file_paths = result_string.split(delimiter)
-            logging.debug("Find results in iTunes: %s" % result_file_paths)
+            logging.debug("Find results in TV: %s" % result_file_paths)
             for file_path in result_file_paths:
                 unicode_filepath = normalize('NFC', file_path.decode('utf-8'))
                 if unicode_filepath == actionable_file_path:
-                    logging.warning("  Already added to iTunes")
+                    logging.warning("  Already added to TV")
                     return
                 #end if result == actionable_file_path:
             #end for file_path in result_file_paths
         #end if not self.opts.force
         
-        logging.warning("  Adding to iTunes...")
+        logging.warning("  Adding to TV...")
         file_str = 'set p to (POSIX file "%s")' % actionable_file_path
-        add_to_playlist_str = 'add p to playlist "%s"' % itunes_playlist
-        add_to_itunes_command = ['osascript', '-e', 'try', '-e', file_str, '-e', 'tell application "iTunes"', '-e', add_to_playlist_str, '-e', 'end tell', '-e', 'end try']
-        logging.debug("'add to iTunes' script: %s" % (add_to_itunes_command))
-        result = subprocess.Popen(add_to_itunes_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0].rstrip()
+        add_to_playlist_str = 'add p to playlist "%s"' % tv_playlist
+        add_to_tv_command = ['osascript', '-e', 'try', '-e', file_str, '-e', 'tell application "TV"', '-e', add_to_playlist_str, '-e', 'end tell', '-e', 'end try']
+        logging.debug("'add to TV' script: %s" % (add_to_tv_command))
+        result = subprocess.Popen(add_to_tv_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn = self.preexec).communicate()[0].rstrip()
         if result.startswith("file track id"):
-            Summary().add_to_itunes_succeeded()
-            logging.warning("    Adding additional metadata to item in iTunes...")
+            Summary(). add_to_tv_succeeded()
+            logging.warning("    Adding additional metadata to item in TV...")
             current_item_str = 'tell %s' % result
             set_rating_str = 'set rating to %i as integer' % self.video_item.itunes_rating()
             set_play_count_str = 'set played count to %s as integer' % self.video_item.view_count
-            add_metadata_to_itunes_command = ['osascript', '-e', 'try', '-e', 'tell application "iTunes"', '-e', current_item_str, '-e', set_play_count_str, '-e', set_rating_str, '-e', 'end tell', '-e', 'end tell', '-e', 'end try']
-            logging.debug("'add additional metadata iTunes' script: %s" % (add_metadata_to_itunes_command))
-            subprocess.call(add_metadata_to_itunes_command)
+            add_metadata_to_tv_command = ['osascript', '-e', 'try', '-e', 'tell application "TV"', '-e', current_item_str, '-e', set_play_count_str, '-e', set_rating_str, '-e', 'end tell', '-e', 'end tell', '-e', 'end try']
+            logging.debug("'add additional metadata TV' script: %s" % (add_metadata_to_tv_command))
+            subprocess.call(add_metadata_to_tv_command)
         else:
-            Summary().add_to_itunes_failed()
-            logging.critical("Failed 'add to iTunes' for '%s'. Incorrect path or not a compatible file type?" % (actionable_file_path) )
+            Summary().add_to_tv_failed()
+            logging.critical("Failed 'add to TV' for '%s'. Incorrect path or not a compatible file type?" % (actionable_file_path) )
         #end if result.startswith
-    #end def add_to_itunes
+    #end def add_to_tv
     
     def process(self):
         skipped_all = True
@@ -411,10 +419,10 @@ class VideoItemProcessor:
                     skipped_all = no_action = False
                     self.export_resources(part_item)
                 #end if export_resouces
-                if self.opts.add_to_itunes:
+                if self.opts.add_to_tv:
                     skipped_all = no_action = False
-                    self.add_to_itunes(part_item)
-                #end if add_to_itunes
+                    self.add_to_tv(part_item)
+                #end if add_to_tv
                 if self.opts.open_file_location and not no_action:
                     logging.warning("opening '%s'..." % part_item.modified_file_path())
                     command = ['open', "-R", part_item.modified_file_path()]
