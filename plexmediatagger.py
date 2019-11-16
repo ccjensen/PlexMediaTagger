@@ -17,7 +17,7 @@ their excellent CLI tool to used to write the information to the media files
 """
 
 __author__ = "ccjensen/Chris"
-__version__ = "0.8"
+__version__ = "0.8.1"
 
 import sys
 import os

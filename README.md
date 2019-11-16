@@ -1,5 +1,5 @@
 #  Plex Media Tagger
-Tested on Mac OS X 10.10.1 (Yosemite)  
+Tested on macOS Catalina (10.15.1)
 
 thanks goes to:  
 the [Plex team](http://www.plexapp.com), their PMS takes care of all the hard work of gathering the metadata and providing an intuitive web API to browse the local library.  
@@ -54,7 +54,7 @@ Note: Filepaths to media items in PMS need to be the same as on machine that is 
 | --stats                        | gather "interesting" statistics about the items being processed                                                                                                                                                                                                                                                       |
 | -m                             | perform a find & replace operation on the pms' media file paths (useful if you are running the script on a different machine than the one who is hosting the pms, i.e. the mount paths are different). Supply multiple times to perform several different replacements (operations are performed in order supplied).  |
 | --open                         | open a Finder window at the containing folder of the file just processed (Mac OS X only)                                                                                                                                                                                                                              |
-| --add-to-itunes                | adds the item to iTunes if not already present                                                                                                                                                                                                                                                                        |
+| --add-to-itunes                | adds the item to TV if not already present                                                                                                                                                                                                                                                                            |
 | -i IP, --ip=IP                 |  specify an alternate IP address that hosts a PMS to connect to (default is localhost)                                                                                                                                                                                                                                |
 | -p PORT, --port=PORT           | specify an alternate port number to use when connecting to the PMS (default is 32400)                                                                                                                                                                                                                                 |
 | --username=USERNAME            | specify the username to use when authenticating with the PMS (default is no authentication)                                                                                                                                                                                                                           |
