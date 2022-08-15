@@ -214,11 +214,11 @@ Filepaths to media items in PMS need to be the same as on machine that is runnin
             logging.warning( "empty input equals all" )
     
             #ask user what sections should be processed
-            section_element_choice = raw_input("Section to process $")
+            section_element_choice = input("Section to process $")
             if section_element_choice != '':
                 try:
                     section_element_choice = int(section_element_choice)
-                except ValueError, e:
+                except ValueError as e:
                     logging.debug(e)
                     logging.critical( "'%s' is not a valid section number" % input )
                     sys.exit(1)
